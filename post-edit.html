@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>게시글 수정</title>
+
+    <link rel="stylesheet" href="./css/common.css" />
+    <link rel="stylesheet" href="./css/posts.css" />
+  </head>
+  <body>
+    <header class="header">
+      <a
+        href="./post-detail.html"
+        class="header-back-button"
+        aria-label="게시글 상세 페이지로 이동"
+      >
+        &lt;
+      </a>
+
+      <h1 class="header-title">아무 말 대잔치</h1>
+
+      <button
+        class="header-profile-button"
+        type="button"
+        aria-label="회원 메뉴"
+      >
+        <span class="header-profile-image"></span>
+      </button>
+      <nav class="header-profile-menu" aria-label="회원 메뉴">
+        <a href="./profile-edit.html" class="header-profile-menu-item">
+          회원정보수정
+        </a>
+        <a href="./password-edit.html" class="header-profile-menu-item">
+          비밀번호수정
+        </a>
+        <button type="button" class="header-profile-menu-item logout-button">
+          로그아웃
+        </button>
+      </nav>
+    </header>
+
+    <main class="post-create-page">
+      <section class="post-create-section">
+        <h2 class="post-create-title">게시글 수정</h2>
+
+        <form class="post-create-form post-edit-form" novalidate>
+          <div class="post-create-field">
+            <label for="editPostTitle" class="post-create-label">제목*</label>
+
+            <input
+              id="editPostTitle"
+              class="post-title-input"
+              type="text"
+              maxlength="26"
+              placeholder="제목을 입력해주세요. (최대 26글자)"
+            />
+          </div>
+
+          <div class="post-create-field post-content-field">
+            <label for="editPostContent" class="post-create-label">내용*</label>
+
+            <textarea
+              id="editPostContent"
+              class="post-content-textarea"
+              placeholder="내용을 입력해주세요."
+            ></textarea>
+
+            <p id="postEditHelperText" class="post-create-helper-text"></p>
+          </div>
+
+          <div class="post-image-field">
+            <label class="post-image-label">이미지</label>
+
+            <div class="post-file-row">
+              <label for="editPostImage" class="post-file-button">
+                파일 선택
+              </label>
+              <input
+                id="editPostImage"
+                class="post-file-input"
+                type="file"
+                accept="image/*"
+              />
+              <span id="editPostFileName" class="post-file-name">
+                기존 파일명
+              </span>
+            </div>
+          </div>
+
+          <button type="submit" class="post-submit-button">수정하기</button>
+        </form>
+      </section>
+    </main>
+    <script src="./js/config.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/common.js"></script>
+    <script src="./js/posts.js"></script>
+  </body>
+</html>

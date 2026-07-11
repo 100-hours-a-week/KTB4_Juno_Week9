@@ -1,0 +1,462 @@
+.profile-edit-page {
+  min-height: calc(100vh - 104px);
+  background-color: #f4f5f7;
+
+  display: flex;
+  justify-content: center;
+}
+
+.profile-edit-section {
+  width: 392px;
+  margin-top: 161px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-edit-title {
+  width: 166px;
+  height: 38px;
+
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #000000;
+}
+
+.profile-edit-form {
+  width: 392px;
+  margin-top: 16px;
+}
+
+.profile-image-field {
+  width: 392px;
+}
+
+.profile-image-label {
+  display: block;
+  width: 77px;
+  height: 18px;
+  margin-left: 22px;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #000000;
+}
+
+.profile-image-edit-button {
+  width: 149px;
+  height: 149px;
+  margin: 22px auto 0;
+
+  border-radius: 50%;
+  background-color: #4646468c;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-image-change-text {
+  width: 52px;
+  height: 27px;
+
+  border: 1px solid #ffffff;
+  border-radius: 25px;
+  background-color: #00000059;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #ffffff;
+}
+
+.profile-info-field {
+  width: 355px;
+  margin-left: 22px;
+}
+
+.profile-info-field:first-of-type {
+  margin-top: 28px;
+}
+
+.profile-info-label {
+  display: block;
+  width: fit-content;
+  height: 18px;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #000000;
+}
+
+.profile-email {
+  width: 153px;
+  height: 17px;
+  margin-top: 16px;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #000000;
+}
+
+.nickname-field {
+  margin-top: 16px;
+}
+
+.profile-nickname-input {
+  width: 355px;
+  height: 33px;
+  margin-top: 8px;
+  padding: 0 10px;
+
+  border: 1px solid #000000;
+  border-radius: 4px;
+  background-color: transparent;
+
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+}
+
+.profile-helper-text {
+  width: auto;
+  min-width: 200px;
+  height: 15px;
+  margin-top: 4px;
+
+  font-family: Inter, Pretendard, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #ff0000;
+
+  white-space: nowrap;
+}
+
+.profile-submit-button {
+  width: 355px;
+  height: 33px;
+  margin: 12px auto 0;
+
+  border-radius: 4px;
+  background-color: #aca0eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #ffffff;
+}
+
+.withdraw-button {
+  width: auto;
+  min-width: 52px;
+  height: 17px;
+  margin-top: 12px;
+
+  background-color: transparent;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #000000;
+
+  white-space: nowrap;
+}
+
+.profile-toast {
+  width: 102px;
+  height: 46px;
+  margin-top: 89px;
+  padding: 12px 20px;
+
+  border-radius: 30px;
+  background-color: #aca0eb;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 100%;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.profile-toast.show {
+  display: flex;
+}
+.profile-image-input {
+  display: none;
+}
+
+.profile-image-edit-button {
+  width: 149px;
+  height: 149px;
+  margin: 22px auto 0;
+
+  border-radius: 50%;
+  background-color: #4646468c;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.profile-image-edit-button.has-image {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.profile-image-edit-button.has-image .profile-image-change-text {
+  display: flex;
+}
+
+.profile-image-change-text {
+  width: 52px;
+  height: 27px;
+
+  border: 1px solid #ffffff;
+  border-radius: 25px;
+  background-color: #00000059;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #ffffff;
+}
+
+/* 비밀번호 수정 */
+.password-edit-page {
+  min-height: calc(100vh - 104px);
+  background-color: #f4f5f7;
+
+  display: flex;
+  justify-content: center;
+}
+
+.password-edit-section {
+  width: 392px;
+  margin-top: 161px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.password-edit-title {
+  width: 174px;
+  height: 38px;
+
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #000000;
+}
+
+.password-edit-form {
+  width: 355px;
+  margin-top: 94px;
+}
+
+.password-edit-field {
+  width: 355px;
+}
+
+.password-edit-label {
+  display: block;
+  height: 18px;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #000000;
+}
+
+.password-edit-input {
+  width: 355px;
+  height: 33px;
+  margin-top: 8px;
+  padding: 0 10px;
+
+  border: 1px solid #000000;
+  border-radius: 4px;
+  background-color: transparent;
+
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+}
+
+.password-edit-input::placeholder {
+  color: #000000;
+}
+
+.password-helper-text {
+  width: auto;
+  min-width: 355px;
+  height: 15px;
+  margin-top: 4px;
+
+  font-family: Inter, Pretendard, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #ff0000;
+
+  white-space: nowrap;
+}
+
+.password-confirm-field {
+  margin-top: 8px;
+}
+
+.password-submit-button {
+  width: 355px;
+  height: 33px;
+  margin-top: 19px;
+
+  border-radius: 4px;
+  background-color: #aca0eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* 회원 탈퇴 확인 모달 */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  width: 100%;
+  height: 100vh;
+
+  background-color: rgba(0, 0, 0, 0.5);
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop.show {
+  display: flex;
+}
+
+.withdraw-modal {
+  width: 408px;
+  height: 242px;
+
+  border-radius: 12px;
+  background-color: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.withdraw-modal-title {
+  width: auto;
+  height: 29px;
+  margin-top: 49px;
+
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #000000;
+
+  white-space: nowrap;
+}
+
+.withdraw-modal-description {
+  width: auto;
+  height: 24px;
+  margin-top: 24px;
+
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #000000;
+
+  white-space: nowrap;
+}
+
+.withdraw-modal-actions {
+  margin-top: 31px;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.withdraw-modal-cancel-button,
+.withdraw-modal-confirm-button {
+  width: 127px;
+  height: 44px;
+
+  border-radius: 12px;
+
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #ffffff;
+}
+
+.withdraw-modal-cancel-button {
+  background-color: #242424;
+}
+
+.withdraw-modal-confirm-button {
+  background-color: #c4a5fa;
+}
