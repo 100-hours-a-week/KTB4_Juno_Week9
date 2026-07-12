@@ -621,8 +621,17 @@ if (postCreateForm) {
   const postCreateHelperText = document.querySelector("#postCreateHelperText");
   const postSubmitButton = document.querySelector(".post-submit-button");
 
+  const postImageDropzone = document.querySelector("#postImageDropzone");
+  const postUploadPlaceholder = document.querySelector(
+    "#postUploadPlaceholder",
+  );
+  const postImagePreview = document.querySelector("#postImagePreview");
+  const postPreviewImage = document.querySelector("#postPreviewImage");
+  const postImageRemoveButton = document.querySelector(
+    "#postImageRemoveButton",
+  );
+
   let selectedPostImage = null;
-  let selectedPostImageDataUrl = "";
   let isPostSubmitting = false;
 
   const setHelperText = (message) => {
@@ -637,15 +646,25 @@ if (postCreateForm) {
     const title = postTitleInput.value.trim();
     const content = postContentTextarea.value.trim();
 
-    return title && title.length <= 26 && content;
+    return Boolean(title && title.length <= 26 && content);
   };
 
   const validatePostForm = () => {
     const title = postTitleInput.value.trim();
     const content = postContentTextarea.value.trim();
 
-    if (!title || !content) {
-      setHelperText("*제목, 내용을 모두 작성해주세요");
+    if (!title) {
+      setHelperText("*제목을 입력해주세요.");
+      return false;
+    }
+
+    if (title.length > 26) {
+      setHelperText("*제목은 최대 26자까지 입력할 수 있습니다.");
+      return false;
+    }
+
+    if (!content) {
+      setHelperText("*내용을 입력해주세요.");
       return false;
     }
 
@@ -654,19 +673,53 @@ if (postCreateForm) {
   };
 
   const updatePostSubmitButtonState = () => {
-    postSubmitButton.disabled = isPostSubmitting;
+    const isValid = isPostFormValid();
 
-    if (isPostSubmitting) {
-      postSubmitButton.style.backgroundColor = "#aca0eb";
+    postSubmitButton.disabled = isPostSubmitting || !isValid;
+  };
+
+  const resetPostImage = () => {
+    selectedPostImage = null;
+    postImageInput.value = "";
+    postPreviewImage.removeAttribute("src");
+
+    postImagePreview.classList.remove("show");
+    postUploadPlaceholder.style.display = "flex";
+    postFileName.textContent = "선택된 이미지가 없습니다.";
+  };
+
+  const renderPostImagePreview = (file) => {
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+      postPreviewImage.src = reader.result;
+      postImagePreview.classList.add("show");
+      postUploadPlaceholder.style.display = "none";
+    });
+
+    reader.addEventListener("error", () => {
+      alert("이미지를 불러오지 못했습니다.");
+      resetPostImage();
+    });
+
+    reader.readAsDataURL(file);
+  };
+
+  const selectPostImage = (file) => {
+    if (!file) {
       return;
     }
 
-    if (isPostFormValid()) {
-      postSubmitButton.style.backgroundColor = "#7f6aee";
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있습니다.");
+      resetPostImage();
       return;
     }
 
-    postSubmitButton.style.backgroundColor = "#aca0eb";
+    selectedPostImage = file;
+    postFileName.textContent = file.name;
+
+    renderPostImagePreview(file);
   };
 
   const createPostApi = async () => {
@@ -674,6 +727,7 @@ if (postCreateForm) {
 
     if (selectedPostImage) {
       const imageResponse = await uploadImageApi(selectedPostImage);
+
       imageUrl = imageResponse.data.image_url;
     }
 
@@ -699,26 +753,43 @@ if (postCreateForm) {
     updatePostSubmitButtonState();
   });
 
-  postImageInput.addEventListener("change", () => {
-    const file = postImageInput.files[0];
-
-    if (!file) {
-      selectedPostImage = null;
-      selectedPostImageDataUrl = "";
-      postFileName.textContent = "파일을 선택해주세요.";
+  postImageDropzone.addEventListener("click", (event) => {
+    if (event.target.closest("#postImageRemoveButton")) {
       return;
     }
 
-    selectedPostImage = file;
-    postFileName.textContent = file.name;
+    postImageInput.click();
+  });
 
-    const reader = new FileReader();
+  postImageInput.addEventListener("change", () => {
+    const file = postImageInput.files[0];
 
-    reader.addEventListener("load", () => {
-      selectedPostImageDataUrl = reader.result;
+    selectPostImage(file);
+  });
+
+  postImageRemoveButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    resetPostImage();
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    postImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      postImageDropzone.classList.add("drag-over");
     });
+  });
 
-    reader.readAsDataURL(file);
+  ["dragleave", "drop"].forEach((eventName) => {
+    postImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      postImageDropzone.classList.remove("drag-over");
+    });
+  });
+
+  postImageDropzone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+
+    selectPostImage(file);
   });
 
   postCreateForm.addEventListener("submit", async (event) => {
@@ -731,7 +802,7 @@ if (postCreateForm) {
     const isValid = validatePostForm();
 
     if (!isValid) {
-      postSubmitButton.style.backgroundColor = "#aca0eb";
+      updatePostSubmitButtonState();
       return;
     }
 
@@ -744,7 +815,6 @@ if (postCreateForm) {
       window.location.href = "./posts.html";
     } catch (error) {
       setHelperText(`*${error.message}`);
-      postSubmitButton.style.backgroundColor = "#aca0eb";
     } finally {
       isPostSubmitting = false;
       updatePostSubmitButtonState();
