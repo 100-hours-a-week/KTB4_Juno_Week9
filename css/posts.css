@@ -4,8 +4,8 @@
   --board-surface-low: #f3f4f5;
   --board-surface-high: #e7e8e9;
 
-  --board-primary: #b71422;
-  --board-primary-dark: #930014;
+  --board-primary: #9c2600;
+  --board-primary-dark: #721c00;
   --board-primary-light: #ffdad7;
 
   --board-text: #191c1d;
@@ -389,10 +389,6 @@
   font-weight: 600;
   line-height: 20px;
   color: var(--board-secondary-text);
-}
-
-.post-stat:first-child {
-  color: var(--board-primary);
 }
 
 .post-stat-icon {
@@ -1690,4 +1686,111 @@
   line-height: 100%;
   text-align: center;
   color: #000000;
+}
+
+/* 모바일 화면 기준 레이아웃 */
+
+.board-header,
+.board-bottom-navigation,
+.post-write-actions {
+  left: 50%;
+  width: min(100%, 430px);
+  transform: translateX(-50%);
+}
+
+.board-header.hidden {
+  transform: translate(-50%, -100%);
+}
+
+.posts-page,
+.post-detail-page,
+.post-write-page {
+  width: min(100%, 430px);
+  margin: 0 auto;
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.posts-section,
+.post-detail-section,
+.post-create-section {
+  max-width: none;
+}
+
+.posts-title,
+.post-detail-title,
+.post-create-title {
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.post-list {
+  margin-top: 0;
+  gap: 12px;
+}
+
+.post-card {
+  flex-direction: column;
+}
+
+.post-thumbnail {
+  order: -1;
+  width: 100%;
+  min-height: 180px;
+}
+
+.post-detail-card-content {
+  padding: 20px 16px;
+}
+
+.post-detail-header,
+.comment-item {
+  flex-direction: column;
+}
+
+.post-detail-actions,
+.comment-actions {
+  align-self: flex-end;
+}
+
+.post-detail-content {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.post-detail-stats {
+  gap: 16px;
+  overflow-x: auto;
+}
+
+.comment-create-form {
+  gap: 12px;
+}
+
+.comment-writer-profile {
+  width: 36px;
+  height: 36px;
+}
+
+.post-create-floating-button {
+  right: max(20px, calc((100vw - 430px) / 2 + 20px));
+}
+
+.post-write-actions {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.delete-modal {
+  width: min(408px, calc(100% - 32px));
+}
+
+@media (max-width: 640px) {
+  .posts-page,
+  .post-detail-page,
+  .post-write-page,
+  .post-write-actions {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
 }
