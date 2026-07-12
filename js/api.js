@@ -1,12 +1,12 @@
 const getAuthHeaders = () => {
-  const userId = localStorage.getItem("userId");
+  const accessToken = localStorage.getItem("accessToken");
 
-  if (!userId) {
+  if (!accessToken) {
     return {};
   }
 
   return {
-    user_id: userId,
+    Authorization: `Bearer ${accessToken}`,
   };
 };
 
@@ -36,6 +36,9 @@ const uploadImageApi = async (file) => {
 
   const response = await fetch(`${API_BASE_URL}/images`, {
     method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+    },
     body: formData,
   });
 

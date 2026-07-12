@@ -25,13 +25,14 @@ const setBackgroundImage = (element, imageUrl) => {
   element.style.backgroundPosition = "center";
   element.style.backgroundRepeat = "no-repeat";
 };
-
 const formatCount = (count) => {
-  if (count >= 1000) {
-    return `${Math.floor(count / 1000)}k`;
+  const safeCount = Number(count ?? 0);
+
+  if (safeCount >= 1000) {
+    return `${Math.floor(safeCount / 1000)}k`;
   }
 
-  return String(count);
+  return String(safeCount);
 };
 
 /* 게시글 목록 페이지 API 연동 */
@@ -39,6 +40,11 @@ const formatCount = (count) => {
 const postList = document.querySelector("#postList");
 
 if (postList) {
+  const boardBackButton = document.querySelector("#boardBackButton");
+  const topHeader = document.querySelector("#topHeader");
+
+  let lastScrollPosition = 0;
+
   const getPostsApi = async () => {
     return await request("/posts");
   };
@@ -47,7 +53,11 @@ if (postList) {
     postList.innerHTML = "";
 
     if (!posts.length) {
-      postList.innerHTML = `<p class="post-empty-message">게시글이 없습니다.</p>`;
+      postList.innerHTML = `
+        <p class="post-empty-message">
+          아직 작성된 게시글이 없습니다.
+        </p>
+      `;
       return;
     }
 
@@ -59,30 +69,71 @@ if (postList) {
 
       postCardLink.innerHTML = `
         <article class="post-card">
-          <div class="post-card-top">
-            <h2 class="post-title">${post.title}</h2>
+          <div class="post-card-content">
+            <div class="post-author-row">
+              <div class="post-author-image"></div>
 
-            <div class="post-info-row">
-              <div class="post-stats">
-              <span>좋아요 ${formatCount(post.like_count)}</span>
-              <span>댓글 ${formatCount(post.comment_count)}</span>
-              <span>조회수 ${formatCount(post.view_count)}</span>
+              <div class="post-author-info">
+                <span class="post-author-name">
+                  ${post.author_nickname}
+                </span>
+
+                <time class="post-date">
+                  ${post.created_at}
+                </time>
               </div>
+            </div>
 
-              <time class="post-date">${post.created_at}</time>
+            <h3 class="post-title">${post.title}</h3>
+
+            <p class="post-preview">
+              ${post.content || ""}
+            </p>
+
+            <div class="post-stats">
+              <span class="post-stat">
+                <span
+                  class="material-symbols-outlined post-stat-icon"
+                  style="font-variation-settings: 'FILL' 1"
+                >
+                  favorite
+                </span>
+
+                <span>${formatCount(post.like_count)}</span>
+              </span>
+
+              <span class="post-stat">
+                <span class="material-symbols-outlined post-stat-icon">
+                  forum
+                </span>
+
+                <span>${formatCount(post.comment_count)}</span>
+              </span>
+
+              <span class="post-stat">
+                <span class="material-symbols-outlined post-stat-icon">
+                  visibility
+                </span>
+
+                <span>${formatCount(post.view_count)}</span>
+              </span>
             </div>
           </div>
 
-          <div class="post-card-bottom">
-            <div class="post-author-image"></div>
-            <span class="post-author-name">${post.author_nickname}</span>
-          </div>
+          <div class="post-thumbnail"></div>
         </article>
       `;
 
       const postAuthorImage = postCardLink.querySelector(".post-author-image");
+      const postThumbnail = postCardLink.querySelector(".post-thumbnail");
 
       setBackgroundImage(postAuthorImage, post.author_profile_image);
+
+      if (post.image) {
+        setBackgroundImage(postThumbnail, post.image);
+      } else {
+        postThumbnail.classList.add("hidden");
+      }
 
       postList.appendChild(postCardLink);
     });
@@ -92,11 +143,39 @@ if (postList) {
     try {
       const response = await getPostsApi();
 
-      renderPosts(response.data.posts);
+      renderPosts(response.data.posts || []);
     } catch (error) {
       alert(error.message);
     }
   };
+
+  if (boardBackButton) {
+    boardBackButton.addEventListener("click", () => {
+      window.history.back();
+    });
+  }
+
+  if (topHeader) {
+    window.addEventListener("scroll", () => {
+      const currentScrollPosition = window.scrollY;
+
+      if (currentScrollPosition <= 0) {
+        topHeader.classList.remove("hidden");
+        topHeader.classList.remove("scrolled");
+        lastScrollPosition = currentScrollPosition;
+        return;
+      }
+
+      if (currentScrollPosition > lastScrollPosition) {
+        topHeader.classList.add("hidden");
+      } else {
+        topHeader.classList.remove("hidden");
+        topHeader.classList.add("scrolled");
+      }
+
+      lastScrollPosition = currentScrollPosition;
+    });
+  }
 
   loadPosts();
 }
@@ -118,6 +197,9 @@ if (postDetailTitle) {
   const postDetailViewCount = document.querySelector("#postDetailViewCount");
   const postDetailCommentCount = document.querySelector(
     "#postDetailCommentCount",
+  );
+  const postDetailCommentCountBadge = document.querySelector(
+    "#postDetailCommentCountBadge",
   );
   const detailLikeStatCard = document.querySelector(".like-stat-card");
   const postEditLink = document.querySelector("#postEditLink");
@@ -162,32 +244,47 @@ if (postDetailTitle) {
 
     comments.forEach((comment) => {
       const commentItem = document.createElement("article");
+
       commentItem.className = "comment-item";
       commentItem.dataset.commentId = comment.comment_id;
 
       commentItem.innerHTML = `
-        <div class="comment-main">
-          <div class="comment-profile-image"></div>
+      <div class="comment-main">
+        <div class="comment-profile-image"></div>
 
-          <div class="comment-content-box">
-            <div class="comment-meta-row">
-              <span class="comment-author-name">${comment.author_nickname}</span>
-              <time class="comment-date">${comment.created_at}</time>
-            </div>
+        <div class="comment-content-box">
+          <div class="comment-meta-row">
+            <span class="comment-author-name">
+              ${comment.author_nickname}
+            </span>
 
-            <p class="comment-content">${comment.content}</p>
+            <time class="comment-date">
+              ${comment.created_at}
+            </time>
           </div>
-        </div>
 
-        <div class="comment-actions">
-          <button type="button" class="post-detail-action-button comment-edit-button">
-            <span class="post-detail-action-text">수정</span>
-          </button>
-          <button type="button" class="post-detail-action-button comment-delete-button">
-            <span class="post-detail-action-text">삭제</span>
-          </button>
+          <p class="comment-content">${comment.content}</p>
         </div>
-      `;
+      </div>
+
+      <div class="comment-actions">
+        <button
+          type="button"
+          class="comment-action-button comment-edit-button"
+          aria-label="댓글 수정"
+        >
+          <span class="material-symbols-outlined">edit</span>
+        </button>
+
+        <button
+          type="button"
+          class="comment-action-button comment-delete-button"
+          aria-label="댓글 삭제"
+        >
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+    `;
 
       const commentProfileImage = commentItem.querySelector(
         ".comment-profile-image",
@@ -198,7 +295,6 @@ if (postDetailTitle) {
       commentList.appendChild(commentItem);
     });
   };
-
   const updateComments = (comments) => {
     currentComments = comments;
     renderComments(currentComments);
@@ -208,22 +304,21 @@ if (postDetailTitle) {
     postDetailLikeCount.textContent = formatCount(likeCount);
     likeState.liked = liked;
 
-    if (likeState.liked) {
-      detailLikeStatCard.style.backgroundColor = "#aca0eb";
-      return;
-    }
-
-    detailLikeStatCard.style.backgroundColor = "#d9d9d9";
+    detailLikeStatCard.classList.toggle("liked", liked);
   };
 
   const reloadComments = async () => {
     const response = await getPostDetailApi();
+    const comments = response.data.comments ?? [];
+    const commentCount = response.data.comment_count ?? comments.length;
 
-    updateComments(response.data.comments || []);
+    updateComments(comments);
 
-    postDetailCommentCount.textContent = formatCount(
-      response.data.comment_count,
-    );
+    postDetailCommentCount.textContent = formatCount(commentCount);
+
+    if (postDetailCommentCountBadge) {
+      postDetailCommentCountBadge.textContent = formatCount(commentCount);
+    }
   };
 
   const isPostOwner = (authorId) => {
@@ -246,19 +341,30 @@ if (postDetailTitle) {
   };
 
   const renderPostDetail = (post) => {
-    postDetailTitle.textContent = post.title;
-    postDetailAuthorName.textContent = post.author_nickname;
-    postDetailDate.textContent = post.created_at;
-    postDetailContent.textContent = post.content;
+    const comments = post.comments ?? [];
 
-    postDetailViewCount.textContent = formatCount(post.view_count);
-    postDetailCommentCount.textContent = formatCount(post.comment_count);
+    const likeCount = post.likeCount ?? 0;
+    const viewCount = post.viewCount ?? 0;
+    const commentCount = post.commentCount ?? comments.length;
 
-    updateLikeState(post.like_count, post.liked);
+    postDetailTitle.textContent = post.title ?? "";
+    postDetailAuthorName.textContent = post.nickname ?? "";
+    postDetailDate.textContent = post.createdAt ?? "";
+    postDetailContent.textContent = post.content ?? "";
 
-    postEditLink.href = `./post-edit.html?post_id=${post.post_id}`;
+    postDetailViewCount.textContent = formatCount(viewCount);
+    postDetailCommentCount.textContent = formatCount(commentCount);
 
-    setBackgroundImage(postDetailAuthorImage, post.author_profile_image);
+    if (postDetailCommentCountBadge) {
+      postDetailCommentCountBadge.textContent = formatCount(commentCount);
+    }
+
+    updateLikeState(likeCount, post.liked ?? false);
+
+    postEditLink.href = `./post-edit.html?post_id=${post.postId}`;
+
+    setBackgroundImage(postDetailAuthorImage, post.profileImage);
+
     if (post.image) {
       setPostDetailImage(postDetailImage, post.image);
       postDetailImage.style.display = "flex";
@@ -266,8 +372,8 @@ if (postDetailTitle) {
       postDetailImage.style.display = "none";
     }
 
-    updateComments(post.comments || []);
-    updatePostActionVisibility(post.author_id);
+    updateComments(comments);
+    updatePostActionVisibility(post.authorId);
   };
 
   const loadPostDetail = async () => {
@@ -345,19 +451,14 @@ if (postDetailTitle) {
     const updateCommentButtonState = () => {
       const commentText = commentTextarea.value.trim();
 
-      commentSubmitButton.disabled = isCommentSubmitting;
+      commentSubmitButton.disabled = isCommentSubmitting || !commentText;
 
-      if (isCommentSubmitting) {
-        commentSubmitButton.style.backgroundColor = "#aca0eb";
+      if (isCommentSubmitting || !commentText) {
+        commentSubmitButton.style.backgroundColor = "#c8c6c6";
         return;
       }
 
-      if (commentText) {
-        commentSubmitButton.style.backgroundColor = "#7f6aee";
-        return;
-      }
-
-      commentSubmitButton.style.backgroundColor = "#aca0eb";
+      commentSubmitButton.style.backgroundColor = "#b71422";
     };
 
     const startEditComment = (commentId) => {
@@ -520,8 +621,17 @@ if (postCreateForm) {
   const postCreateHelperText = document.querySelector("#postCreateHelperText");
   const postSubmitButton = document.querySelector(".post-submit-button");
 
+  const postImageDropzone = document.querySelector("#postImageDropzone");
+  const postUploadPlaceholder = document.querySelector(
+    "#postUploadPlaceholder",
+  );
+  const postImagePreview = document.querySelector("#postImagePreview");
+  const postPreviewImage = document.querySelector("#postPreviewImage");
+  const postImageRemoveButton = document.querySelector(
+    "#postImageRemoveButton",
+  );
+
   let selectedPostImage = null;
-  let selectedPostImageDataUrl = "";
   let isPostSubmitting = false;
 
   const setHelperText = (message) => {
@@ -536,15 +646,25 @@ if (postCreateForm) {
     const title = postTitleInput.value.trim();
     const content = postContentTextarea.value.trim();
 
-    return title && title.length <= 26 && content;
+    return Boolean(title && title.length <= 26 && content);
   };
 
   const validatePostForm = () => {
     const title = postTitleInput.value.trim();
     const content = postContentTextarea.value.trim();
 
-    if (!title || !content) {
-      setHelperText("*제목, 내용을 모두 작성해주세요");
+    if (!title) {
+      setHelperText("*제목을 입력해주세요.");
+      return false;
+    }
+
+    if (title.length > 26) {
+      setHelperText("*제목은 최대 26자까지 입력할 수 있습니다.");
+      return false;
+    }
+
+    if (!content) {
+      setHelperText("*내용을 입력해주세요.");
       return false;
     }
 
@@ -553,19 +673,53 @@ if (postCreateForm) {
   };
 
   const updatePostSubmitButtonState = () => {
-    postSubmitButton.disabled = isPostSubmitting;
+    const isValid = isPostFormValid();
 
-    if (isPostSubmitting) {
-      postSubmitButton.style.backgroundColor = "#aca0eb";
+    postSubmitButton.disabled = isPostSubmitting || !isValid;
+  };
+
+  const resetPostImage = () => {
+    selectedPostImage = null;
+    postImageInput.value = "";
+    postPreviewImage.removeAttribute("src");
+
+    postImagePreview.classList.remove("show");
+    postUploadPlaceholder.style.display = "flex";
+    postFileName.textContent = "선택된 이미지가 없습니다.";
+  };
+
+  const renderPostImagePreview = (file) => {
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+      postPreviewImage.src = reader.result;
+      postImagePreview.classList.add("show");
+      postUploadPlaceholder.style.display = "none";
+    });
+
+    reader.addEventListener("error", () => {
+      alert("이미지를 불러오지 못했습니다.");
+      resetPostImage();
+    });
+
+    reader.readAsDataURL(file);
+  };
+
+  const selectPostImage = (file) => {
+    if (!file) {
       return;
     }
 
-    if (isPostFormValid()) {
-      postSubmitButton.style.backgroundColor = "#7f6aee";
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있습니다.");
+      resetPostImage();
       return;
     }
 
-    postSubmitButton.style.backgroundColor = "#aca0eb";
+    selectedPostImage = file;
+    postFileName.textContent = file.name;
+
+    renderPostImagePreview(file);
   };
 
   const createPostApi = async () => {
@@ -573,6 +727,7 @@ if (postCreateForm) {
 
     if (selectedPostImage) {
       const imageResponse = await uploadImageApi(selectedPostImage);
+
       imageUrl = imageResponse.data.image_url;
     }
 
@@ -598,26 +753,43 @@ if (postCreateForm) {
     updatePostSubmitButtonState();
   });
 
-  postImageInput.addEventListener("change", () => {
-    const file = postImageInput.files[0];
-
-    if (!file) {
-      selectedPostImage = null;
-      selectedPostImageDataUrl = "";
-      postFileName.textContent = "파일을 선택해주세요.";
+  postImageDropzone.addEventListener("click", (event) => {
+    if (event.target.closest("#postImageRemoveButton")) {
       return;
     }
 
-    selectedPostImage = file;
-    postFileName.textContent = file.name;
+    postImageInput.click();
+  });
 
-    const reader = new FileReader();
+  postImageInput.addEventListener("change", () => {
+    const file = postImageInput.files[0];
 
-    reader.addEventListener("load", () => {
-      selectedPostImageDataUrl = reader.result;
+    selectPostImage(file);
+  });
+
+  postImageRemoveButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    resetPostImage();
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    postImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      postImageDropzone.classList.add("drag-over");
     });
+  });
 
-    reader.readAsDataURL(file);
+  ["dragleave", "drop"].forEach((eventName) => {
+    postImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      postImageDropzone.classList.remove("drag-over");
+    });
+  });
+
+  postImageDropzone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+
+    selectPostImage(file);
   });
 
   postCreateForm.addEventListener("submit", async (event) => {
@@ -630,7 +802,7 @@ if (postCreateForm) {
     const isValid = validatePostForm();
 
     if (!isValid) {
-      postSubmitButton.style.backgroundColor = "#aca0eb";
+      updatePostSubmitButtonState();
       return;
     }
 
@@ -643,7 +815,6 @@ if (postCreateForm) {
       window.location.href = "./posts.html";
     } catch (error) {
       setHelperText(`*${error.message}`);
-      postSubmitButton.style.backgroundColor = "#aca0eb";
     } finally {
       isPostSubmitting = false;
       updatePostSubmitButtonState();
@@ -663,13 +834,30 @@ if (postEditForm) {
   const editPostImageInput = document.querySelector("#editPostImage");
   const editPostFileName = document.querySelector("#editPostFileName");
   const postEditHelperText = document.querySelector("#postEditHelperText");
-  const editPostSubmitButton = postEditForm.querySelector(
-    ".post-submit-button",
+
+  const editPostSubmitButton = document.querySelector(".post-submit-button");
+
+  const editPostImageDropzone = document.querySelector(
+    "#editPostImageDropzone",
+  );
+  const editPostUploadPlaceholder = document.querySelector(
+    "#editPostUploadPlaceholder",
+  );
+  const editPostImagePreview = document.querySelector("#editPostImagePreview");
+  const editPostPreviewImage = document.querySelector("#editPostPreviewImage");
+  const editPostImageRemoveButton = document.querySelector(
+    "#editPostImageRemoveButton",
   );
 
+  const postEditBackLink = document.querySelector("#postEditBackLink");
+  const postEditCancelLink = document.querySelector("#postEditCancelLink");
+
+  const params = new URLSearchParams(window.location.search);
+  const postId = params.get("post_id");
+
   let selectedEditImage = null;
-  let selectedEditImageDataUrl = "";
   let currentPostImageUrl = "";
+  let isImageRemoved = false;
   let isEditPostSubmitting = false;
 
   const setEditHelperText = (message) => {
@@ -684,15 +872,25 @@ if (postEditForm) {
     const title = editPostTitleInput.value.trim();
     const content = editPostContentTextarea.value.trim();
 
-    return title && content;
+    return Boolean(title && title.length <= 26 && content);
   };
 
   const validatePostEditForm = () => {
     const title = editPostTitleInput.value.trim();
     const content = editPostContentTextarea.value.trim();
 
-    if (!title || !content) {
-      setEditHelperText("*제목, 내용을 모두 작성해주세요");
+    if (!title) {
+      setEditHelperText("*제목을 입력해주세요.");
+      return false;
+    }
+
+    if (title.length > 26) {
+      setEditHelperText("*제목은 최대 26자까지 입력할 수 있습니다.");
+      return false;
+    }
+
+    if (!content) {
+      setEditHelperText("*내용을 입력해주세요.");
       return false;
     }
 
@@ -701,23 +899,65 @@ if (postEditForm) {
   };
 
   const updateEditSubmitButtonState = () => {
-    editPostSubmitButton.disabled = isEditPostSubmitting;
-
-    if (isEditPostSubmitting) {
-      editPostSubmitButton.style.backgroundColor = "#aca0eb";
-      return;
-    }
-
-    if (isPostEditFormValid()) {
-      editPostSubmitButton.style.backgroundColor = "#7f6aee";
-      return;
-    }
-
-    editPostSubmitButton.style.backgroundColor = "#aca0eb";
+    editPostSubmitButton.disabled =
+      isEditPostSubmitting || !isPostEditFormValid();
   };
 
-  const params = new URLSearchParams(window.location.search);
-  const postId = params.get("post_id");
+  const showEditImagePreview = (imageUrl) => {
+    editPostPreviewImage.src = imageUrl;
+    editPostImagePreview.classList.add("show");
+    editPostUploadPlaceholder.style.display = "none";
+  };
+
+  const hideEditImagePreview = () => {
+    editPostPreviewImage.removeAttribute("src");
+    editPostImagePreview.classList.remove("show");
+    editPostUploadPlaceholder.style.display = "flex";
+  };
+
+  const resetEditImage = () => {
+    selectedEditImage = null;
+    currentPostImageUrl = "";
+    isImageRemoved = true;
+
+    editPostImageInput.value = "";
+    editPostFileName.textContent = "선택된 이미지가 없습니다.";
+
+    hideEditImagePreview();
+  };
+
+  const renderSelectedEditImage = (file) => {
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+      showEditImagePreview(reader.result);
+    });
+
+    reader.addEventListener("error", () => {
+      alert("이미지를 불러오지 못했습니다.");
+      resetEditImage();
+    });
+
+    reader.readAsDataURL(file);
+  };
+
+  const selectEditImage = (file) => {
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있습니다.");
+      editPostImageInput.value = "";
+      return;
+    }
+
+    selectedEditImage = file;
+    isImageRemoved = false;
+
+    editPostFileName.textContent = file.name;
+    renderSelectedEditImage(file);
+  };
 
   const getPostDetailApi = async () => {
     return await request(`/posts/${postId}`);
@@ -726,8 +966,13 @@ if (postEditForm) {
   const updatePostApi = async () => {
     let imageUrl = currentPostImageUrl;
 
+    if (isImageRemoved) {
+      imageUrl = "";
+    }
+
     if (selectedEditImage) {
       const imageResponse = await uploadImageApi(selectedEditImage);
+
       imageUrl = imageResponse.data.image_url;
     }
 
@@ -744,14 +989,16 @@ if (postEditForm) {
   };
 
   const renderEditPost = (post) => {
-    editPostTitleInput.value = post.title;
-    editPostContentTextarea.value = post.content;
-    currentPostImageUrl = post.image || "";
+    editPostTitleInput.value = post.title ?? "";
+    editPostContentTextarea.value = post.content ?? "";
+    currentPostImageUrl = post.image ?? "";
 
-    if (post.image) {
+    if (currentPostImageUrl) {
+      showEditImagePreview(getFullImageUrl(currentPostImageUrl));
       editPostFileName.textContent = "기존 이미지";
     } else {
-      editPostFileName.textContent = "파일을 선택해주세요.";
+      hideEditImagePreview();
+      editPostFileName.textContent = "선택된 이미지가 없습니다.";
     }
 
     updateEditSubmitButtonState();
@@ -774,7 +1021,18 @@ if (postEditForm) {
     }
   };
 
+  if (postId) {
+    const detailPageUrl = `./post-detail.html?post_id=${postId}`;
+
+    postEditBackLink.href = detailPageUrl;
+    postEditCancelLink.href = detailPageUrl;
+  }
+
   editPostTitleInput.addEventListener("input", () => {
+    if (editPostTitleInput.value.length > 26) {
+      editPostTitleInput.value = editPostTitleInput.value.slice(0, 26);
+    }
+
     clearEditHelperText();
     updateEditSubmitButtonState();
   });
@@ -784,32 +1042,43 @@ if (postEditForm) {
     updateEditSubmitButtonState();
   });
 
-  editPostImageInput.addEventListener("change", () => {
-    const file = editPostImageInput.files[0];
-
-    if (!file) {
-      selectedEditImage = null;
-      selectedEditImageDataUrl = "";
-
-      if (currentPostImageUrl) {
-        editPostFileName.textContent = "기존 이미지";
-      } else {
-        editPostFileName.textContent = "파일을 선택해주세요.";
-      }
-
+  editPostImageDropzone.addEventListener("click", (event) => {
+    if (event.target.closest("#editPostImageRemoveButton")) {
       return;
     }
 
-    selectedEditImage = file;
-    editPostFileName.textContent = file.name;
+    editPostImageInput.click();
+  });
 
-    const reader = new FileReader();
+  editPostImageInput.addEventListener("change", () => {
+    const file = editPostImageInput.files[0];
 
-    reader.addEventListener("load", () => {
-      selectedEditImageDataUrl = reader.result;
+    selectEditImage(file);
+  });
+
+  editPostImageRemoveButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    resetEditImage();
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    editPostImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      editPostImageDropzone.classList.add("drag-over");
     });
+  });
 
-    reader.readAsDataURL(file);
+  ["dragleave", "drop"].forEach((eventName) => {
+    editPostImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      editPostImageDropzone.classList.remove("drag-over");
+    });
+  });
+
+  editPostImageDropzone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+
+    selectEditImage(file);
   });
 
   postEditForm.addEventListener("submit", async (event) => {
@@ -822,7 +1091,7 @@ if (postEditForm) {
     const isValid = validatePostEditForm();
 
     if (!isValid) {
-      editPostSubmitButton.style.backgroundColor = "#aca0eb";
+      updateEditSubmitButtonState();
       return;
     }
 
@@ -842,7 +1111,6 @@ if (postEditForm) {
       window.location.href = `./post-detail.html?post_id=${postId}`;
     } catch (error) {
       setEditHelperText(`*${error.message}`);
-      editPostSubmitButton.style.backgroundColor = "#aca0eb";
     } finally {
       isEditPostSubmitting = false;
       updateEditSubmitButtonState();

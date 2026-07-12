@@ -1,298 +1,590 @@
-/* 로그인 페이지 css */
+:root {
+  --auth-background: #f8f9fa;
+  --auth-surface: #ffffff;
+  --auth-surface-container: #edeeef;
+  --auth-surface-container-high: #e7e8e9;
 
-.login-page {
-  min-height: calc(100vh - 104px);
-  background-color: #f4f5f7;
-  display: flex;
-  justify-content: center;
+  --auth-primary: #b71422;
+  --auth-primary-hover: #930014;
+  --auth-primary-light: #ffdad7;
+
+  --auth-text: #191c1d;
+  --auth-secondary-text: #5f5e5e;
+  --auth-label-text: #5b403e;
+
+  --auth-outline: #e4beba;
+  --auth-error: #ba1a1a;
 }
 
-.login-section {
-  width: 392px;
-  margin-top: 264px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* 인증 페이지 공통 */
+
+.auth-body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--auth-background);
+  font-family: "Work Sans", Pretendard, sans-serif;
 }
 
-.login-title {
-  width: 83px;
-  height: 38px;
-  margin-bottom: 38px;
-  font-family: Pretendard, Arial, sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 100%;
-  text-align: center;
-  color: #000000;
-}
+.auth-page {
+  position: relative;
+  z-index: 1;
 
-.login-form {
-  width: 392px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.login-input-area {
-  width: 392px;
-  height: 198px;
-  padding: 24px 16px 0;
-  background-color: transparent;
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 18px;
-}
-
-.form-label {
-  margin-bottom: 8px;
-  font-family: Pretendard, Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #000000;
-}
-
-.form-input {
   width: 100%;
-  height: 33px;
-  padding: 0 10px;
-  border: 1px solid #000000;
-  border-radius: 4px;
-  background-color: transparent;
-  font-family: Pretendard, Arial, sans-serif;
-  font-size: 14px;
-  color: #000000;
-}
+  min-height: 100vh;
+  padding: 32px 16px;
 
-.form-input::placeholder {
-  color: #000000;
-}
-
-.helper-text {
-  min-height: 15px;
-  margin-top: -10px;
-  font-family: Pretendard, Arial, sans-serif;
-  font-size: 12px;
-  color: #ff0000;
-}
-
-.login-button {
-  width: 361px;
-  height: 37px;
-  border-radius: 8px;
-  background-color: #aca0eb;
-  font-size: 14px;
-  font-weight: 700;
-  color: #ffffff;
-}
-.login-button.active {
-  background-color: #7f6aee;
-}
-
-.signup-link {
-  width: 68px;
-  height: 30px;
-  margin-top: 8px;
-  border-radius: 0 8px 8px 8px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-family: Pretendard, Arial, sans-serif;
-  font-size: 14px;
-  color: #000000;
-}
-
-/* 회원가입 */
-.signup-page {
-  min-height: calc(100vh - 104px);
-  background-color: #f4f5f7;
-  display: flex;
   justify-content: center;
 }
 
-.signup-section {
-  width: 400px;
-  margin-top: 160px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.auth-signup-page {
+  padding-top: 48px;
+  padding-bottom: 48px;
 }
 
-.signup-title {
-  width: 111px;
-  height: 38px;
-  margin-bottom: 8px;
-
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 100%;
-  text-align: center;
-  color: #000000;
+.auth-layout {
+  width: 100%;
+  max-width: 448px;
 }
 
-.signup-form {
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+.auth-decoration {
+  position: fixed;
+  z-index: 0;
 
-.profile-area {
-  width: 378px;
-  height: 206px;
-  padding-top: 13px;
-  padding-left: 0;
-
-  border-radius: 0 8px 8px 8px;
-  border: 4px solid transparent;
-}
-
-.profile-label {
-  width: 69px;
-  height: 18px;
-
-  display: block;
-
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 100%;
-  color: #000000;
-}
-
-.profile-helper-text {
-  width: 71px;
-  height: 15px;
-  margin-top: 4px;
-
-  font-family: Inter, Pretendard, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 100%;
-  color: #ff0000;
-}
-
-.profile-image-button {
-  width: 149px;
-  height: 149px;
-  margin: 12px auto 0;
+  width: 384px;
+  height: 384px;
 
   border-radius: 50%;
-  background-color: #c4c4c4;
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+.auth-decoration-top {
+  top: -10%;
+  right: -10%;
+
+  background-color: var(--auth-primary-light);
+  opacity: 0.55;
+}
+
+.auth-decoration-bottom {
+  bottom: -10%;
+  left: -10%;
+
+  background-color: #ffdcc2;
+  opacity: 0.55;
+}
+
+/* 상단 브랜드 영역 */
+
+.auth-brand {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.auth-brand-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+
+  border-radius: 16px;
+  background-color: var(--auth-primary);
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  box-shadow: 0 8px 20px rgba(183, 20, 34, 0.22);
 }
 
-.plus-icon {
+.auth-brand-icon-symbol {
+  color: #ffffff;
+  font-size: 40px;
+  font-variation-settings: "FILL" 1;
+}
+
+.auth-brand-title {
+  margin: 0;
+
+  font-family: "Plus Jakarta Sans", Pretendard, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+  color: var(--auth-primary);
+}
+
+.auth-brand-description {
+  margin-top: 8px;
+
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--auth-secondary-text);
+}
+
+/* 인증 카드 */
+
+.auth-card {
+  overflow: hidden;
+
+  border: 1px solid var(--auth-surface-container);
+  border-radius: 32px;
+  background-color: var(--auth-surface);
+
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+.auth-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--auth-surface-container);
+}
+
+.auth-tab {
+  flex: 1;
+  height: 53px;
+
+  border-bottom: 2px solid transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Work Sans", Pretendard, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.05em;
+  color: var(--auth-secondary-text);
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.auth-tab:hover {
+  background-color: #fff8f8;
+  color: var(--auth-primary);
+}
+
+.auth-tab-active {
+  border-bottom-color: var(--auth-primary);
+  color: var(--auth-primary);
+}
+
+.auth-card-content {
+  padding: 20px;
+}
+
+.auth-form {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 입력 필드 */
+
+.auth-field {
+  width: 100%;
+}
+
+.auth-label-row {
+  margin-bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.auth-label {
+  display: block;
+  margin: 0 4px 12px;
+
+  font-family: "Work Sans", Pretendard, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.05em;
+  color: var(--auth-label-text);
+}
+
+.auth-label-row .auth-label {
+  margin-bottom: 0;
+}
+
+.auth-input-wrapper {
   position: relative;
-  width: 24px;
-  height: 24px;
+  width: 100%;
+}
+
+.auth-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  z-index: 1;
+
+  color: var(--auth-secondary-text);
+  font-size: 24px;
+
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.auth-input,
+.form-input,
+.signup-input {
+  width: 100%;
+  height: 52px;
+  padding: 12px 16px 12px 48px;
+
+  border: 1.5px solid var(--auth-outline);
+  border-radius: 12px;
+  background-color: transparent;
+
+  font-family: "Work Sans", Pretendard, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--auth-text);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.auth-input::placeholder,
+.form-input::placeholder,
+.signup-input::placeholder {
+  color: #8b8585;
+}
+
+.auth-input:hover,
+.form-input:hover,
+.signup-input:hover {
+  border-color: #c99490;
+}
+
+.auth-input:focus,
+.form-input:focus,
+.signup-input:focus {
+  border-color: var(--auth-primary);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 1px var(--auth-primary);
+}
+
+/* 오류 문구 */
+
+.helper-text,
+.signup-helper-text,
+.profile-helper-text,
+.auth-helper-text,
+.auth-field-helper {
+  width: 100%;
+  min-height: 16px;
+  margin: 6px 4px 0;
+
+  font-family: "Work Sans", Pretendard, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--auth-error);
+
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: keep-all;
+}
+
+.auth-helper-text {
+  height: 30px;
+  min-height: 30px;
+  margin: -6px 4px 0;
+
+  line-height: 16px;
+  overflow: hidden;
+}
+
+/* 회원가입 헬퍼 문구는 내용 길이에 따라 높이가 늘어나도록 설정 */
+.auth-field-helper {
+  height: auto;
+  min-height: 16px;
+  overflow: visible;
+}
+
+/* 제출 버튼 */
+
+.auth-submit-button,
+.login-button,
+.signup-button {
+  width: 100%;
+  min-height: 60px;
+  margin-top: 8px;
+  padding: 14px 24px;
+
+  border: none;
+  border-radius: 9999px;
+  background-color: var(--auth-primary);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Plus Jakarta Sans", Pretendard, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  color: #ffffff;
+
+  box-shadow: 0 8px 16px rgba(183, 20, 34, 0.2);
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.auth-submit-button:hover,
+.login-button:hover,
+.signup-button:hover {
+  background-color: var(--auth-primary-hover);
+  transform: scale(1.02);
+  box-shadow: 0 10px 20px rgba(183, 20, 34, 0.25);
+}
+
+.auth-submit-button:active,
+.login-button:active,
+.signup-button:active {
+  transform: scale(0.98);
+}
+
+.auth-submit-button:disabled,
+.login-button:disabled,
+.signup-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+/*
+  기존 auth.js에서 유효한 입력일 때
+  login-button에 active 클래스를 추가합니다.
+*/
+.login-button.active {
+  background-color: var(--auth-primary);
+}
+
+/* 회원가입 프로필 이미지 */
+
+.auth-profile-area,
+.profile-area {
+  width: 100%;
+  padding: 0;
+  margin: 0 0 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-profile-input {
+  display: none;
+}
+
+.auth-profile-button,
+.profile-image-button {
+  position: relative;
+
+  width: 96px;
+  height: 96px;
+  margin: 0;
+
+  overflow: hidden;
+
+  border: 2px dashed var(--auth-outline);
+  border-radius: 50%;
+  background-color: var(--auth-surface-container-high);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.auth-profile-button:hover,
+.profile-image-button:hover {
+  border-color: var(--auth-primary);
+  background-color: var(--auth-surface-container);
+  transform: scale(1.03);
+}
+
+.auth-profile-content,
+.plus-icon {
+  position: static;
+
+  width: auto;
+  height: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--auth-secondary-text);
 }
 
 .plus-icon::before,
 .plus-icon::after {
-  content: "";
-  position: absolute;
-  background-color: #000000;
+  display: none;
 }
 
-.plus-icon::before {
-  width: 1px;
-  height: 24px;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
+.auth-profile-icon {
+  font-size: 32px;
 }
 
-.plus-icon::after {
-  width: 24px;
-  height: 1px;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+.auth-profile-upload-text {
+  margin-top: 2px;
+
+  font-family: "Work Sans", Pretendard, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
 }
 
-.signup-input-area {
-  width: 400px;
-  padding-left: 22px;
-}
-
-.signup-form-field {
-  width: 355px;
-  margin-bottom: 10px;
-}
-
-.signup-label {
-  width: fit-content;
-  height: 18px;
-  margin-bottom: 8px;
-
-  display: block;
-
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 100%;
-  color: #000000;
-}
-
-.signup-input {
-  width: 355px;
-  height: 33px;
-  padding: 0 10px;
-
-  border: 1px solid #000000;
-  border-radius: 4px;
-  background-color: transparent;
-
-  font-size: 14px;
-  color: #000000;
-}
-
-.signup-input::placeholder {
-  color: #000000;
-}
-
-.signup-helper-text {
-  margin-top: 4px;
-  margin-bottom: 0;
-
-  font-family: Inter, Pretendard, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 100%;
-  color: #ff0000;
-}
-
-.signup-button {
-  width: 355px;
-  height: 33px;
+.auth-profile-description {
   margin-top: 8px;
 
-  border-radius: 4px;
-  background-color: #aca0eb;
-
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 100%;
-  color: #ffffff;
-}
-
-.login-link {
-  width: 89px;
-  height: 17px;
-  margin-top: 10px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
-  line-height: 100%;
-  color: #000000;
+  line-height: 16px;
+  color: var(--auth-secondary-text);
 }
-4
+
+/* 반응형 */
+
+@media (max-width: 480px) {
+  .auth-page {
+    align-items: flex-start;
+    padding: 32px 16px;
+  }
+
+  .auth-signup-page {
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+
+  .auth-brand {
+    margin-bottom: 24px;
+  }
+
+  .auth-brand-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .auth-brand-icon-symbol {
+    font-size: 34px;
+  }
+
+  .auth-brand-title {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
+  .auth-card {
+    border-radius: 24px;
+  }
+
+  .auth-card-content {
+    padding: 20px 16px 24px;
+  }
+
+  .auth-submit-button,
+  .login-button,
+  .signup-button {
+    min-height: 54px;
+    font-size: 18px;
+  }
+
+  .auth-decoration {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+.required-mark {
+  margin-left: 2px;
+  color: var(--auth-error);
+}
+
+/* 모바일 화면 기준 레이아웃 */
+
+.auth-page {
+  align-items: flex-start;
+  width: min(100%, 430px);
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.auth-signup-page {
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.auth-layout {
+  max-width: none;
+}
+
+.auth-brand {
+  margin-bottom: 24px;
+}
+
+.auth-brand-icon {
+  width: 56px;
+  height: 56px;
+}
+
+.auth-brand-icon-symbol {
+  font-size: 34px;
+}
+
+.auth-brand-title {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+.auth-card {
+  border-radius: 24px;
+}
+
+.auth-card-content {
+  padding: 20px 16px 24px;
+}
+
+.auth-submit-button,
+.login-button,
+.signup-button {
+  min-height: 54px;
+  font-size: 18px;
+}
+
+.auth-decoration {
+  width: 280px;
+  height: 280px;
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+}

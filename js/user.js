@@ -1,4 +1,4 @@
-/* 회원정보수정 페이지 이벤트 */
+/* 회원정보 수정 페이지 이벤트 */
 
 const profileEditForm = document.querySelector(".profile-edit-form");
 
@@ -22,9 +22,19 @@ if (profileEditForm) {
     ".withdraw-modal-confirm-button",
   );
 
-  let originalNickname = "";
   let selectedProfileImageFile = null;
   let uploadedProfileImageUrl = "";
+  let isProfileSubmitting = false;
+
+  const getFullProfileImageUrl = (imageUrl) => {
+    if (!imageUrl) {
+      return "";
+    }
+
+    return imageUrl.startsWith("http")
+      ? imageUrl
+      : `${API_BASE_URL}${imageUrl}`;
+  };
 
   const getMyProfileApi = async () => {
     return await request("/users/me");
@@ -35,7 +45,9 @@ if (profileEditForm) {
 
     if (selectedProfileImageFile) {
       const imageResponse = await uploadImageApi(selectedProfileImageFile);
-      profileImageUrl = imageResponse.data.image_url;
+
+      profileImageUrl =
+        imageResponse.data.image_url ?? imageResponse.data.imageUrl ?? "";
     }
 
     const body = {
@@ -61,7 +73,7 @@ if (profileEditForm) {
   };
 
   const hideHelperText = () => {
-    profileHelperText.textContent = "* helper text";
+    profileHelperText.textContent = "";
     profileHelperText.style.visibility = "hidden";
   };
 
@@ -73,8 +85,13 @@ if (profileEditForm) {
       return false;
     }
 
-    if (nickname.length >= 11) {
-      showHelperText("*닉네임은 최대 10자 까지 작성 가능합니다.");
+    if (/\s/.test(nickname)) {
+      showHelperText("*닉네임에는 공백을 사용할 수 없습니다.");
+      return false;
+    }
+
+    if (nickname.length > 10) {
+      showHelperText("*닉네임은 최대 10자까지 작성 가능합니다.");
       return false;
     }
 
@@ -85,15 +102,13 @@ if (profileEditForm) {
   const updateProfileSubmitButtonState = () => {
     const nickname = nicknameInput.value.trim();
 
-    if (!nickname || nickname.length >= 11) {
-      profileSubmitButton.style.backgroundColor = "#aca0eb";
-      return;
-    }
+    const isValid = nickname && !/\s/.test(nickname) && nickname.length <= 10;
 
-    profileSubmitButton.style.backgroundColor = "#7f6aee";
+    profileSubmitButton.disabled = isProfileSubmitting || !isValid;
   };
 
-  const showProfileToast = () => {
+  const showProfileToast = (message) => {
+    profileToast.textContent = message;
     profileToast.classList.add("show");
 
     setTimeout(() => {
@@ -101,24 +116,36 @@ if (profileEditForm) {
     }, 2000);
   };
 
-  const renderMyProfile = (user) => {
-    profileEmail.textContent = user.email;
-    nicknameInput.value = user.nickname;
-    originalNickname = user.nickname;
-    uploadedProfileImageUrl = user.profile_image || "";
-
-    if (uploadedProfileImageUrl) {
-      profileImageEditButton.style.backgroundImage = `url(${API_BASE_URL}${uploadedProfileImageUrl})`;
-      profileImageEditButton.classList.add("has-image");
+  const renderProfileImage = (imageUrl) => {
+    if (!imageUrl) {
+      profileImageEditButton.style.backgroundImage = "";
+      profileImageEditButton.classList.remove("has-image");
+      return;
     }
 
+    profileImageEditButton.style.backgroundImage = `url(${getFullProfileImageUrl(imageUrl)})`;
+
+    profileImageEditButton.classList.add("has-image");
+  };
+
+  const renderMyProfile = (user) => {
+    const profileImage = user.profileImage ?? user.profile_image ?? "";
+
+    if (profileEmail) {
+      profileEmail.textContent = user.email ?? "";
+    }
+
+    nicknameInput.value = user.nickname ?? "";
+    uploadedProfileImageUrl = profileImage;
+
+    renderProfileImage(profileImage);
     updateProfileSubmitButtonState();
   };
 
   const loadMyProfile = async () => {
-    const userId = localStorage.getItem("userId");
+    const accessToken = localStorage.getItem("accessToken");
 
-    if (!userId) {
+    if (!accessToken) {
       alert("로그인이 필요합니다.");
       window.location.href = "./index.html";
       return;
@@ -138,7 +165,12 @@ if (profileEditForm) {
     const file = profileImageInput.files[0];
 
     if (!file) {
-      selectedProfileImageFile = null;
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있습니다.");
+      profileImageInput.value = "";
       return;
     }
 
@@ -148,37 +180,63 @@ if (profileEditForm) {
 
     reader.addEventListener("load", () => {
       profileImageEditButton.style.backgroundImage = `url(${reader.result})`;
+
       profileImageEditButton.classList.add("has-image");
+    });
+
+    reader.addEventListener("error", () => {
+      alert("이미지를 불러오지 못했습니다.");
+      selectedProfileImageFile = null;
+      profileImageInput.value = "";
     });
 
     reader.readAsDataURL(file);
   });
 
   nicknameInput.addEventListener("input", () => {
+    if (nicknameInput.value.length > 10) {
+      nicknameInput.value = nicknameInput.value.slice(0, 10);
+    }
+
     hideHelperText();
     updateProfileSubmitButtonState();
   });
 
+  /* 프로필 이미지와 닉네임만 수정 */
+
   profileEditForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const isValid = validateNickname();
-
-    if (!isValid) {
-      profileSubmitButton.style.backgroundColor = "#aca0eb";
+    if (isProfileSubmitting) {
       return;
     }
 
-    try {
-      await updateMyProfileApi();
+    if (!validateNickname()) {
+      updateProfileSubmitButtonState();
+      return;
+    }
 
-      originalNickname = nicknameInput.value.trim();
+    isProfileSubmitting = true;
+    updateProfileSubmitButtonState();
+
+    try {
+      const response = await updateMyProfileApi();
+
+      const updatedProfileImage =
+        response?.data?.profileImage ??
+        response?.data?.profile_image ??
+        uploadedProfileImageUrl;
+
+      uploadedProfileImageUrl = updatedProfileImage;
       selectedProfileImageFile = null;
-      profileSubmitButton.style.backgroundColor = "#7f6aee";
-      showProfileToast();
+
+      renderProfileImage(updatedProfileImage);
+      showProfileToast("프로필 정보가 수정되었습니다.");
     } catch (error) {
       showHelperText(`*${error.message}`);
-      profileSubmitButton.style.backgroundColor = "#aca0eb";
+    } finally {
+      isProfileSubmitting = false;
+      updateProfileSubmitButtonState();
     }
   });
 
@@ -193,24 +251,13 @@ if (profileEditForm) {
   });
 
   withdrawConfirmButton.addEventListener("click", async () => {
-    const userId = localStorage.getItem("userId");
-
-    if (!userId) {
-      alert("로그인이 필요합니다.");
-      window.location.href = "./index.html";
-      return;
-    }
-
     try {
       await deleteMyAccountApi();
 
-      alert("회원 탈퇴가 완료되었습니다.");
-
       localStorage.removeItem("userId");
+      localStorage.removeItem("accessToken");
 
-      withdrawModal.classList.remove("show");
-      document.body.style.overflow = "";
-
+      alert("회원 탈퇴가 완료되었습니다.");
       window.location.href = "./index.html";
     } catch (error) {
       alert(error.message);
@@ -222,28 +269,37 @@ if (profileEditForm) {
   loadMyProfile();
 }
 
-/* 비밀번호 수정 페이지 이벤트 */
+/* 회원정보 수정 페이지 내부 비밀번호 변경 */
 
-const passwordEditForm = document.querySelector(".password-edit-form");
+const profilePasswordForm = document.querySelector(".profile-password-form");
 
-if (passwordEditForm) {
-  const passwordInput = document.querySelector("#password");
-  const passwordConfirmInput = document.querySelector("#passwordConfirm");
-  const passwordHelperText = document.querySelector("#passwordHelperText");
-  const passwordConfirmHelperText = document.querySelector(
-    "#passwordConfirmHelperText",
+if (profilePasswordForm) {
+  const profilePasswordInput = document.querySelector("#profilePassword");
+  const profilePasswordConfirmInput = document.querySelector(
+    "#profilePasswordConfirm",
   );
-  const passwordSubmitButton = document.querySelector(
-    ".password-submit-button",
+  const profilePasswordHelperText = document.querySelector(
+    "#profilePasswordHelperText",
   );
-  const passwordToast = document.querySelector("#passwordToast");
+  const profilePasswordConfirmHelperText = document.querySelector(
+    "#profilePasswordConfirmHelperText",
+  );
+  const profilePasswordSubmitButton = document.querySelector(
+    ".profile-password-submit-button",
+  );
+  const passwordVisibilityButtons = document.querySelectorAll(
+    ".password-visibility-button",
+  );
+  const profileToast = document.querySelector("#profileToast");
+
+  let isPasswordSubmitting = false;
 
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{};':"\\|,.<>/?]).{8,20}$/;
 
-  const updatePasswordApi = async () => {
+  const updateProfilePasswordApi = async () => {
     const body = {
-      new_password: passwordInput.value.trim(),
+      new_password: profilePasswordInput.value.trim(),
     };
 
     return await request("/users/me/password", {
@@ -252,160 +308,287 @@ if (passwordEditForm) {
     });
   };
 
-  const showPasswordHelperText = (message) => {
-    passwordHelperText.textContent = message;
-    passwordHelperText.style.visibility = "visible";
+  const hidePasswordHelperTexts = () => {
+    profilePasswordHelperText.textContent = "";
+    profilePasswordConfirmHelperText.textContent = "";
   };
 
-  const hidePasswordHelperText = () => {
-    passwordHelperText.textContent = "* helper text";
-    passwordHelperText.style.visibility = "hidden";
-  };
+  const validatePasswordForm = () => {
+    const password = profilePasswordInput.value.trim();
+    const passwordConfirm = profilePasswordConfirmInput.value.trim();
 
-  const showPasswordConfirmHelperText = (message) => {
-    passwordConfirmHelperText.textContent = message;
-    passwordConfirmHelperText.style.visibility = "visible";
-  };
-
-  const hidePasswordConfirmHelperText = () => {
-    passwordConfirmHelperText.textContent = "* helper text";
-    passwordConfirmHelperText.style.visibility = "hidden";
-  };
-
-  const isPasswordFormValid = () => {
-    const password = passwordInput.value.trim();
-    const passwordConfirm = passwordConfirmInput.value.trim();
-
-    return (
-      password &&
-      passwordRegex.test(password) &&
-      passwordConfirm &&
-      password === passwordConfirm
-    );
-  };
-
-  const updatePasswordSubmitButtonState = () => {
-    if (isPasswordFormValid()) {
-      passwordSubmitButton.style.backgroundColor = "#7f6aee";
-      return;
-    }
-
-    passwordSubmitButton.style.backgroundColor = "#aca0eb";
-  };
-
-  const validatePasswordInput = () => {
-    const password = passwordInput.value.trim();
-    const passwordConfirm = passwordConfirmInput.value.trim();
+    hidePasswordHelperTexts();
 
     if (!password) {
-      showPasswordHelperText("*비밀번호를 입력해주세요");
+      profilePasswordHelperText.textContent = "*새 비밀번호를 입력해주세요.";
       return false;
     }
 
     if (!passwordRegex.test(password)) {
-      showPasswordHelperText(
-        "*비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.",
-      );
+      profilePasswordHelperText.textContent =
+        "*비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.";
       return false;
     }
-
-    if (passwordConfirm && password !== passwordConfirm) {
-      showPasswordHelperText("*비밀번호 확인과 다릅니다.");
-      return false;
-    }
-
-    hidePasswordHelperText();
-    return true;
-  };
-
-  const validatePasswordConfirmInput = () => {
-    const password = passwordInput.value.trim();
-    const passwordConfirm = passwordConfirmInput.value.trim();
 
     if (!passwordConfirm) {
-      showPasswordConfirmHelperText("*비밀번호를 한번 더 입력해주세요");
+      profilePasswordConfirmHelperText.textContent =
+        "*새 비밀번호를 한 번 더 입력해주세요.";
       return false;
     }
 
-    if (password && password !== passwordConfirm) {
-      showPasswordConfirmHelperText("*비밀번호와 다릅니다.");
+    if (password !== passwordConfirm) {
+      profilePasswordConfirmHelperText.textContent =
+        "*비밀번호가 일치하지 않습니다.";
       return false;
     }
 
-    hidePasswordConfirmHelperText();
     return true;
   };
 
-  const validatePasswordForm = () => {
-    const isPasswordValid = validatePasswordInput();
-    const isPasswordConfirmValid = validatePasswordConfirmInput();
+  const isPasswordFormValid = () => {
+    const password = profilePasswordInput.value.trim();
+    const passwordConfirm = profilePasswordConfirmInput.value.trim();
 
-    return isPasswordValid && isPasswordConfirmValid;
+    return Boolean(
+      passwordRegex.test(password) &&
+      passwordConfirm &&
+      password === passwordConfirm,
+    );
+  };
+
+  const updatePasswordButtonState = () => {
+    profilePasswordSubmitButton.disabled =
+      isPasswordSubmitting || !isPasswordFormValid();
   };
 
   const showPasswordToast = () => {
-    passwordToast.classList.add("show");
+    profileToast.textContent = "비밀번호가 변경되었습니다.";
+    profileToast.classList.add("show");
 
     setTimeout(() => {
-      passwordToast.classList.remove("show");
+      profileToast.classList.remove("show");
     }, 2000);
   };
 
-  passwordInput.addEventListener("input", () => {
-    validatePasswordInput();
-
-    if (passwordConfirmInput.value.trim()) {
-      validatePasswordConfirmInput();
-    }
-
-    updatePasswordSubmitButtonState();
+  profilePasswordInput.addEventListener("input", () => {
+    hidePasswordHelperTexts();
+    updatePasswordButtonState();
   });
 
-  passwordConfirmInput.addEventListener("input", () => {
-    validatePasswordConfirmInput();
-
-    if (passwordInput.value.trim()) {
-      validatePasswordInput();
-    }
-
-    updatePasswordSubmitButtonState();
+  profilePasswordConfirmInput.addEventListener("input", () => {
+    hidePasswordHelperTexts();
+    updatePasswordButtonState();
   });
 
-  passwordEditForm.addEventListener("submit", async (event) => {
+  passwordVisibilityButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetInput = document.querySelector(`#${button.dataset.target}`);
+      const icon = button.querySelector(".material-symbols-outlined");
+
+      if (!targetInput || !icon) {
+        return;
+      }
+
+      const shouldShow = targetInput.type === "password";
+
+      targetInput.type = shouldShow ? "text" : "password";
+      icon.textContent = shouldShow ? "visibility_off" : "visibility";
+    });
+  });
+
+  profilePasswordForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const isValid = validatePasswordForm();
-
-    if (!isValid) {
-      passwordSubmitButton.style.backgroundColor = "#aca0eb";
+    if (isPasswordSubmitting) {
       return;
     }
 
-    const userId = localStorage.getItem("userId");
-
-    if (!userId) {
-      alert("로그인이 필요합니다.");
-      window.location.href = "./index.html";
+    if (!validatePasswordForm()) {
+      updatePasswordButtonState();
       return;
     }
+
+    isPasswordSubmitting = true;
+    updatePasswordButtonState();
 
     try {
-      await updatePasswordApi();
+      await updateProfilePasswordApi();
 
-      passwordInput.value = "";
-      passwordConfirmInput.value = "";
-      passwordSubmitButton.style.backgroundColor = "#aca0eb";
+      profilePasswordInput.value = "";
+      profilePasswordConfirmInput.value = "";
 
-      hidePasswordHelperText();
-      hidePasswordConfirmHelperText();
+      hidePasswordHelperTexts();
       showPasswordToast();
     } catch (error) {
-      showPasswordHelperText(`*${error.message}`);
-      passwordSubmitButton.style.backgroundColor = "#aca0eb";
+      profilePasswordHelperText.textContent = `*${error.message}`;
+    } finally {
+      isPasswordSubmitting = false;
+      updatePasswordButtonState();
     }
   });
 
-  hidePasswordHelperText();
-  hidePasswordConfirmHelperText();
-  updatePasswordSubmitButtonState();
+  hidePasswordHelperTexts();
+  updatePasswordButtonState();
+
+  /* 회원정보 수정 페이지 내부 비밀번호 변경 */
+
+  const profilePasswordForm = document.querySelector(".profile-password-form");
+
+  if (profilePasswordForm) {
+    const profilePasswordInput = document.querySelector("#profilePassword");
+    const profilePasswordConfirmInput = document.querySelector(
+      "#profilePasswordConfirm",
+    );
+    const profilePasswordHelperText = document.querySelector(
+      "#profilePasswordHelperText",
+    );
+    const profilePasswordConfirmHelperText = document.querySelector(
+      "#profilePasswordConfirmHelperText",
+    );
+    const profilePasswordSubmitButton = document.querySelector(
+      ".profile-password-submit-button",
+    );
+    const passwordVisibilityButtons = document.querySelectorAll(
+      ".password-visibility-button",
+    );
+    const profileToast = document.querySelector("#profileToast");
+
+    let isPasswordSubmitting = false;
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{};':"\\|,.<>/?]).{8,20}$/;
+
+    const updateProfilePasswordApi = async () => {
+      const body = {
+        new_password: profilePasswordInput.value.trim(),
+      };
+
+      return await request("/users/me/password", {
+        method: "PUT",
+        body: JSON.stringify(body),
+      });
+    };
+
+    const hidePasswordHelperTexts = () => {
+      profilePasswordHelperText.textContent = "";
+      profilePasswordConfirmHelperText.textContent = "";
+    };
+
+    const validatePasswordForm = () => {
+      const password = profilePasswordInput.value.trim();
+      const passwordConfirm = profilePasswordConfirmInput.value.trim();
+
+      hidePasswordHelperTexts();
+
+      if (!password) {
+        profilePasswordHelperText.textContent = "*새 비밀번호를 입력해주세요.";
+        return false;
+      }
+
+      if (!passwordRegex.test(password)) {
+        profilePasswordHelperText.textContent =
+          "*비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.";
+        return false;
+      }
+
+      if (!passwordConfirm) {
+        profilePasswordConfirmHelperText.textContent =
+          "*새 비밀번호를 한 번 더 입력해주세요.";
+        return false;
+      }
+
+      if (password !== passwordConfirm) {
+        profilePasswordConfirmHelperText.textContent =
+          "*비밀번호가 일치하지 않습니다.";
+        return false;
+      }
+
+      return true;
+    };
+
+    const isPasswordFormValid = () => {
+      const password = profilePasswordInput.value.trim();
+      const passwordConfirm = profilePasswordConfirmInput.value.trim();
+
+      return Boolean(
+        passwordRegex.test(password) &&
+        passwordConfirm &&
+        password === passwordConfirm,
+      );
+    };
+
+    const updatePasswordButtonState = () => {
+      profilePasswordSubmitButton.disabled =
+        isPasswordSubmitting || !isPasswordFormValid();
+    };
+
+    const showPasswordToast = () => {
+      profileToast.textContent = "비밀번호가 변경되었습니다.";
+      profileToast.classList.add("show");
+
+      setTimeout(() => {
+        profileToast.classList.remove("show");
+      }, 2000);
+    };
+
+    profilePasswordInput.addEventListener("input", () => {
+      hidePasswordHelperTexts();
+      updatePasswordButtonState();
+    });
+
+    profilePasswordConfirmInput.addEventListener("input", () => {
+      hidePasswordHelperTexts();
+      updatePasswordButtonState();
+    });
+
+    passwordVisibilityButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetInput = document.querySelector(`#${button.dataset.target}`);
+        const icon = button.querySelector(".material-symbols-outlined");
+
+        if (!targetInput || !icon) {
+          return;
+        }
+
+        const shouldShow = targetInput.type === "password";
+
+        targetInput.type = shouldShow ? "text" : "password";
+        icon.textContent = shouldShow ? "visibility_off" : "visibility";
+      });
+    });
+
+    profilePasswordForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (isPasswordSubmitting) {
+        return;
+      }
+
+      if (!validatePasswordForm()) {
+        updatePasswordButtonState();
+        return;
+      }
+
+      isPasswordSubmitting = true;
+      updatePasswordButtonState();
+
+      try {
+        await updateProfilePasswordApi();
+
+        profilePasswordInput.value = "";
+        profilePasswordConfirmInput.value = "";
+
+        hidePasswordHelperTexts();
+        showPasswordToast();
+      } catch (error) {
+        profilePasswordHelperText.textContent = `*${error.message}`;
+      } finally {
+        isPasswordSubmitting = false;
+        updatePasswordButtonState();
+      }
+    });
+
+    hidePasswordHelperTexts();
+    updatePasswordButtonState();
+  }
 }

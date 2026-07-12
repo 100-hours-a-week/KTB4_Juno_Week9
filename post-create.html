@@ -3,93 +3,176 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>게시글 작성</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Work+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+      rel="stylesheet"
+    />
 
     <link rel="stylesheet" href="./css/common.css" />
     <link rel="stylesheet" href="./css/posts.css" />
   </head>
-  <body>
-    <header class="header">
-      <a
-        href="./posts.html"
-        class="header-back-button"
-        aria-label="게시글 목록으로 이동"
-      >
-        &lt;
-      </a>
 
-      <h1 class="header-title">아무 말 대잔치</h1>
+  <body class="post-write-body">
+    <header class="board-header">
+      <div class="board-header-left">
+        <a
+          href="./posts.html"
+          class="board-header-back-button"
+          aria-label="게시글 목록으로 이동"
+        >
+          <span class="material-symbols-outlined">arrow_back</span>
+        </a>
 
-      <button
-        class="header-profile-button"
-        type="button"
-        aria-label="회원 메뉴"
-      >
-        <span class="header-profile-image"></span>
-      </button>
-      <nav class="header-profile-menu" aria-label="회원 메뉴">
-        <a href="./profile-edit.html" class="header-profile-menu-item">
-          회원정보수정
-        </a>
-        <a href="./password-edit.html" class="header-profile-menu-item">
-          비밀번호수정
-        </a>
-        <button type="button" class="header-profile-menu-item logout-button">
-          로그아웃
+        <h1 class="board-header-title">Community</h1>
+      </div>
+
+      <div class="board-profile-area">
+        <button
+          class="header-profile-button board-profile-button"
+          type="button"
+          aria-label="회원 메뉴"
+        >
+          <span class="header-profile-image board-profile-image"></span>
         </button>
-      </nav>
+
+        <nav
+          class="header-profile-menu board-profile-menu"
+          aria-label="회원 메뉴"
+        >
+          <a href="./profile-edit.html" class="header-profile-menu-item">
+            회원정보 수정
+          </a>
+
+          <a href="./password-edit.html" class="header-profile-menu-item">
+            비밀번호 수정
+          </a>
+
+          <button type="button" class="header-profile-menu-item logout-button">
+            로그아웃
+          </button>
+        </nav>
+      </div>
     </header>
 
-    <main class="post-create-page">
+    <main class="post-write-page">
       <section class="post-create-section">
-        <h2 class="post-create-title">게시글 작성</h2>
+        <div class="post-write-heading">
+          <h2 class="post-create-title">새 게시글 작성</h2>
 
-        <form class="post-create-form" novalidate>
-          <div class="post-create-field">
-            <label for="postTitle" class="post-create-label">제목*</label>
+          <p class="post-write-description">
+            자유롭게 이야기를 작성하고 다른 사용자들과 공유해보세요.
+          </p>
+        </div>
+
+        <form id="postCreateForm" class="post-create-form" novalidate>
+          <div class="post-write-field">
+            <label for="postTitle" class="post-write-label">
+              제목<span class="post-required-mark">*</span>
+            </label>
 
             <input
               id="postTitle"
               class="post-title-input"
               type="text"
               maxlength="26"
-              placeholder="제목을 입력해주세요. (최대 26글자)"
+              placeholder="게시글 제목을 입력해주세요. (최대 26자)"
             />
           </div>
 
-          <div class="post-create-field post-content-field">
-            <label for="postContent" class="post-create-label">내용*</label>
+          <div class="post-write-field">
+            <span class="post-write-label">이미지</span>
 
-            <textarea
-              id="postContent"
-              class="post-content-textarea"
-              placeholder="내용을 입력해주세요."
-            ></textarea>
-
-            <p id="postCreateHelperText" class="post-create-helper-text"></p>
-          </div>
-
-          <div class="post-image-field">
-            <label class="post-image-label">이미지</label>
-
-            <div class="post-file-row">
-              <label for="postImage" class="post-file-button">파일 선택</label>
+            <div
+              id="postImageDropzone"
+              class="post-image-dropzone"
+              role="button"
+              tabindex="0"
+              aria-label="게시글 이미지 선택"
+            >
               <input
                 id="postImage"
                 class="post-file-input"
                 type="file"
                 accept="image/*"
               />
-              <span id="postFileName" class="post-file-name">
-                파일을 선택해주세요.
-              </span>
+
+              <div id="postUploadPlaceholder" class="post-upload-placeholder">
+                <div class="post-upload-icon-wrapper">
+                  <span class="material-symbols-outlined post-upload-icon">
+                    add_a_photo
+                  </span>
+                </div>
+
+                <p class="post-upload-title">
+                  클릭하거나 이미지를 끌어다 놓아주세요
+                </p>
+
+                <p class="post-upload-description">PNG 또는 JPG 이미지</p>
+              </div>
+
+              <div id="postImagePreview" class="post-image-preview">
+                <img
+                  id="postPreviewImage"
+                  class="post-preview-image"
+                  alt="선택한 게시글 이미지 미리보기"
+                />
+
+                <div class="post-preview-overlay">
+                  <button
+                    id="postImageRemoveButton"
+                    class="post-image-remove-button"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">delete</span>
+                    이미지 삭제
+                  </button>
+                </div>
+              </div>
             </div>
+
+            <span id="postFileName" class="post-file-name">
+              선택된 이미지가 없습니다.
+            </span>
           </div>
 
-          <button type="submit" class="post-submit-button">완료</button>
+          <div class="post-write-field">
+            <label for="postContent" class="post-write-label">
+              내용<span class="post-required-mark">*</span>
+            </label>
+
+            <textarea
+              id="postContent"
+              class="post-content-textarea"
+              placeholder="게시글 내용을 입력해주세요."
+              rows="8"
+            ></textarea>
+          </div>
+
+          <p
+            id="postCreateHelperText"
+            class="post-create-helper-text"
+            aria-live="polite"
+          ></p>
         </form>
       </section>
     </main>
+
+    <div class="post-write-actions">
+      <a href="./posts.html" class="post-cancel-button"> 취소 </a>
+
+      <button type="submit" form="postCreateForm" class="post-submit-button">
+        게시글 등록
+      </button>
+    </div>
+
     <script src="./js/config.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/common.js"></script>

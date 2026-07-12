@@ -3,51 +3,114 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>로그인</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Work+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+      rel="stylesheet"
+    />
 
     <link rel="stylesheet" href="./css/common.css" />
     <link rel="stylesheet" href="./css/auth.css" />
   </head>
-  <body>
-    <header class="header">
-      <h1 class="header-title">아무 말 대잔치</h1>
-    </header>
 
-    <main class="login-page">
-      <section class="login-section">
-        <h2 class="login-title">로그인</h2>
+  <body class="auth-body">
+    <div class="auth-decoration auth-decoration-top"></div>
+    <div class="auth-decoration auth-decoration-bottom"></div>
 
-        <form class="login-form" novalidate>
-          <div class="login-input-area">
-            <div class="form-field">
-              <label for="email" class="form-label">이메일</label>
-              <input
-                id="email"
-                class="form-input"
-                type="text"
-                inputmode="email"
-                placeholder="이메일을 입력하세요"
-              />
-            </div>
-
-            <div class="form-field">
-              <label for="password" class="form-label">비밀번호</label>
-              <input
-                id="password"
-                class="form-input"
-                type="password"
-                autocomplete="current-password"
-                placeholder="비밀번호를 입력하세요"
-              />
-            </div>
-
-            <p id="loginHelperText" class="helper-text"></p>
+    <main class="auth-page">
+      <section class="auth-layout">
+        <div class="auth-brand">
+          <div class="auth-brand-icon">
+            <span
+              class="material-symbols-outlined auth-brand-icon-symbol"
+              aria-hidden="true"
+            >
+              person
+            </span>
           </div>
 
-          <button type="submit" class="login-button">로그인</button>
-        </form>
+          <h1 class="auth-brand-title">환영합니다 ~</h1>
+          <p class="auth-brand-description">가입해보세요~</p>
+        </div>
 
-        <a href="./signup.html" class="signup-link"> 회원가입 </a>
+        <div class="auth-card">
+          <nav class="auth-tabs" aria-label="로그인 및 회원가입">
+            <a
+              href="./index.html"
+              class="auth-tab auth-tab-active"
+              aria-current="page"
+            >
+              로그인
+            </a>
+
+            <a href="./signup.html" class="auth-tab">회원가입</a>
+          </nav>
+
+          <div class="auth-card-content">
+            <form class="login-form auth-form" novalidate>
+              <div class="auth-field">
+                <label for="email" class="auth-label">이메일</label>
+
+                <div class="auth-input-wrapper">
+                  <span
+                    class="material-symbols-outlined auth-input-icon"
+                    aria-hidden="true"
+                  >
+                    mail
+                  </span>
+
+                  <input
+                    id="email"
+                    class="form-input auth-input"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="email"
+                    placeholder="이메일을 입력하세요."
+                  />
+                </div>
+              </div>
+
+              <div class="auth-field">
+                <div class="auth-label-row">
+                  <label for="password" class="auth-label">비밀번호</label>
+                </div>
+
+                <div class="auth-input-wrapper">
+                  <span
+                    class="material-symbols-outlined auth-input-icon"
+                    aria-hidden="true"
+                  >
+                    lock
+                  </span>
+
+                  <input
+                    id="password"
+                    class="form-input auth-input"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <p
+                id="loginHelperText"
+                class="helper-text auth-helper-text"
+                aria-live="polite"
+              ></p>
+
+              <button type="submit" class="login-button auth-submit-button">
+                로그인
+              </button>
+            </form>
+          </div>
+        </div>
       </section>
     </main>
 
