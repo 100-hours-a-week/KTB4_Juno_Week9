@@ -39,6 +39,11 @@ const formatCount = (count) => {
 const postList = document.querySelector("#postList");
 
 if (postList) {
+  const boardBackButton = document.querySelector("#boardBackButton");
+  const topHeader = document.querySelector("#topHeader");
+
+  let lastScrollPosition = 0;
+
   const getPostsApi = async () => {
     return await request("/posts");
   };
@@ -47,7 +52,11 @@ if (postList) {
     postList.innerHTML = "";
 
     if (!posts.length) {
-      postList.innerHTML = `<p class="post-empty-message">게시글이 없습니다.</p>`;
+      postList.innerHTML = `
+        <p class="post-empty-message">
+          아직 작성된 게시글이 없습니다.
+        </p>
+      `;
       return;
     }
 
@@ -59,30 +68,71 @@ if (postList) {
 
       postCardLink.innerHTML = `
         <article class="post-card">
-          <div class="post-card-top">
-            <h2 class="post-title">${post.title}</h2>
+          <div class="post-card-content">
+            <div class="post-author-row">
+              <div class="post-author-image"></div>
 
-            <div class="post-info-row">
-              <div class="post-stats">
-              <span>좋아요 ${formatCount(post.like_count)}</span>
-              <span>댓글 ${formatCount(post.comment_count)}</span>
-              <span>조회수 ${formatCount(post.view_count)}</span>
+              <div class="post-author-info">
+                <span class="post-author-name">
+                  ${post.author_nickname}
+                </span>
+
+                <time class="post-date">
+                  ${post.created_at}
+                </time>
               </div>
+            </div>
 
-              <time class="post-date">${post.created_at}</time>
+            <h3 class="post-title">${post.title}</h3>
+
+            <p class="post-preview">
+              ${post.content || ""}
+            </p>
+
+            <div class="post-stats">
+              <span class="post-stat">
+                <span
+                  class="material-symbols-outlined post-stat-icon"
+                  style="font-variation-settings: 'FILL' 1"
+                >
+                  favorite
+                </span>
+
+                <span>${formatCount(post.like_count)}</span>
+              </span>
+
+              <span class="post-stat">
+                <span class="material-symbols-outlined post-stat-icon">
+                  forum
+                </span>
+
+                <span>${formatCount(post.comment_count)}</span>
+              </span>
+
+              <span class="post-stat">
+                <span class="material-symbols-outlined post-stat-icon">
+                  visibility
+                </span>
+
+                <span>${formatCount(post.view_count)}</span>
+              </span>
             </div>
           </div>
 
-          <div class="post-card-bottom">
-            <div class="post-author-image"></div>
-            <span class="post-author-name">${post.author_nickname}</span>
-          </div>
+          <div class="post-thumbnail"></div>
         </article>
       `;
 
       const postAuthorImage = postCardLink.querySelector(".post-author-image");
+      const postThumbnail = postCardLink.querySelector(".post-thumbnail");
 
       setBackgroundImage(postAuthorImage, post.author_profile_image);
+
+      if (post.image) {
+        setBackgroundImage(postThumbnail, post.image);
+      } else {
+        postThumbnail.classList.add("hidden");
+      }
 
       postList.appendChild(postCardLink);
     });
@@ -92,11 +142,39 @@ if (postList) {
     try {
       const response = await getPostsApi();
 
-      renderPosts(response.data.posts);
+      renderPosts(response.data.posts || []);
     } catch (error) {
       alert(error.message);
     }
   };
+
+  if (boardBackButton) {
+    boardBackButton.addEventListener("click", () => {
+      window.history.back();
+    });
+  }
+
+  if (topHeader) {
+    window.addEventListener("scroll", () => {
+      const currentScrollPosition = window.scrollY;
+
+      if (currentScrollPosition <= 0) {
+        topHeader.classList.remove("hidden");
+        topHeader.classList.remove("scrolled");
+        lastScrollPosition = currentScrollPosition;
+        return;
+      }
+
+      if (currentScrollPosition > lastScrollPosition) {
+        topHeader.classList.add("hidden");
+      } else {
+        topHeader.classList.remove("hidden");
+        topHeader.classList.add("scrolled");
+      }
+
+      lastScrollPosition = currentScrollPosition;
+    });
+  }
 
   loadPosts();
 }

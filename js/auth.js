@@ -80,6 +80,7 @@ if (loginForm) {
       const response = await signinApi();
 
       localStorage.setItem("userId", response.data.user_id);
+      localStorage.setItem("accessToken", response.data.access_token);
 
       window.location.href = "./posts.html";
     } catch (error) {
