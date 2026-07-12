@@ -3,99 +3,209 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>회원가입</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Work+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+      rel="stylesheet"
+    />
 
     <link rel="stylesheet" href="./css/common.css" />
     <link rel="stylesheet" href="./css/auth.css" />
   </head>
-  <body>
-    <header class="header">
-      <a
-        href="./index.html"
-        class="header-back-button"
-        aria-label="로그인 페이지로 이동"
-      >
-        &lt;
-      </a>
-      <h1 class="header-title">아무 말 대잔치</h1>
-    </header>
 
-    <main class="signup-page">
-      <section class="signup-section">
-        <h2 class="signup-title">회원가입</h2>
+  <body class="auth-body">
+    <div class="auth-decoration auth-decoration-top"></div>
+    <div class="auth-decoration auth-decoration-bottom"></div>
 
-        <form class="signup-form" novalidate>
-          <div class="profile-area">
-            <label class="profile-label">프로필 사진</label>
-            <p id="profileHelperText" class="profile-helper-text"></p>
-
-            <input id="profileImageInput" type="file" accept="image/*" hidden />
-
-            <button
-              type="button"
-              class="profile-image-button"
-              aria-label="프로필 사진 추가"
+    <main class="auth-page auth-signup-page">
+      <section class="auth-layout">
+        <div class="auth-brand">
+          <div class="auth-brand-icon">
+            <span
+              class="material-symbols-outlined auth-brand-icon-symbol"
+              aria-hidden="true"
             >
-              <span class="plus-icon"></span>
-            </button>
+              person
+            </span>
           </div>
 
-          <div class="signup-input-area">
-            <div class="signup-form-field">
-              <label for="signupEmail" class="signup-label">이메일*</label>
-              <input
-                id="signupEmail"
-                class="signup-input"
-                type="text"
-                inputmode="email"
-                placeholder="이메일을 입력하세요"
-              />
-              <p id="signupEmailHelper" class="signup-helper-text"></p>
-            </div>
+          <h1 class="auth-brand-title">환영합니다 ~</h1>
+          <p class="auth-brand-description">가입해보세요~</p>
+        </div>
 
-            <div class="signup-form-field">
-              <label for="signupPassword" class="signup-label">비밀번호*</label>
-              <input
-                id="signupPassword"
-                class="signup-input"
-                type="password"
-                placeholder="비밀번호를 입력하세요"
-              />
-              <p id="signupPasswordHelper" class="signup-helper-text"></p>
-            </div>
+        <div class="auth-card">
+          <nav class="auth-tabs" aria-label="로그인 및 회원가입">
+            <a href="./index.html" class="auth-tab">로그인</a>
 
-            <div class="signup-form-field">
-              <label for="signupPasswordConfirm" class="signup-label">
-                비밀번호 확인*
-              </label>
-              <input
-                id="signupPasswordConfirm"
-                class="signup-input"
-                type="password"
-                placeholder="비밀번호를 한번 더 입력하세요"
-              />
-              <p
-                id="signupPasswordConfirmHelper"
-                class="signup-helper-text"
-              ></p>
-            </div>
+            <a
+              href="./signup.html"
+              class="auth-tab auth-tab-active"
+              aria-current="page"
+            >
+              회원가입
+            </a>
+          </nav>
 
-            <div class="signup-form-field">
-              <label for="signupNickname" class="signup-label">닉네임*</label>
-              <input
-                id="signupNickname"
-                class="signup-input"
-                type="text"
-                placeholder="닉네임을 입력하세요"
-              />
-              <p id="signupNicknameHelper" class="signup-helper-text"></p>
-            </div>
+          <div class="auth-card-content">
+            <form class="signup-form auth-form" novalidate>
+              <div class="profile-area auth-profile-area">
+                <input
+                  id="profileImageInput"
+                  class="auth-profile-input"
+                  type="file"
+                  accept="image/*"
+                />
 
-            <button type="submit" class="signup-button">회원가입</button>
+                <button
+                  type="button"
+                  class="profile-image-button auth-profile-button"
+                  aria-label="프로필 사진 추가"
+                >
+                  <span class="plus-icon auth-profile-content">
+                    <span
+                      class="material-symbols-outlined auth-profile-icon"
+                      aria-hidden="true"
+                    >
+                      add_a_photo
+                    </span>
+
+                    <span class="auth-profile-upload-text">Upload</span>
+                  </span>
+                </button>
+
+                <p class="auth-profile-description">프로필 사진을 등록하세요</p>
+              </div>
+
+              <div class="auth-field">
+                <label for="signupEmail" class="auth-label">
+                  이메일<span class="required-mark">*</span>
+                </label>
+
+                <div class="auth-input-wrapper">
+                  <span
+                    class="material-symbols-outlined auth-input-icon"
+                    aria-hidden="true"
+                  >
+                    mail
+                  </span>
+
+                  <input
+                    id="signupEmail"
+                    class="signup-input auth-input"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="email"
+                    placeholder="이메일을 입력하세요."
+                  />
+                </div>
+
+                <p
+                  id="signupEmailHelper"
+                  class="signup-helper-text auth-field-helper"
+                  aria-live="polite"
+                ></p>
+              </div>
+
+              <div class="auth-field">
+                <label for="signupNickname" class="auth-label">
+                  닉네임<span class="required-mark">*</span>
+                </label>
+
+                <div class="auth-input-wrapper">
+                  <span
+                    class="material-symbols-outlined auth-input-icon"
+                    aria-hidden="true"
+                  >
+                    badge
+                  </span>
+
+                  <input
+                    id="signupNickname"
+                    class="signup-input auth-input"
+                    type="text"
+                    autocomplete="nickname"
+                    maxlength="10"
+                    placeholder="닉네임을 입력하세요."
+                  />
+                </div>
+
+                <p
+                  id="signupNicknameHelper"
+                  class="signup-helper-text auth-field-helper"
+                  aria-live="polite"
+                ></p>
+              </div>
+
+              <div class="auth-field">
+                <label for="signupPassword" class="auth-label">
+                  비밀번호<span class="required-mark">*</span>
+                </label>
+
+                <div class="auth-input-wrapper">
+                  <span
+                    class="material-symbols-outlined auth-input-icon"
+                    aria-hidden="true"
+                  >
+                    lock
+                  </span>
+
+                  <input
+                    id="signupPassword"
+                    class="signup-input auth-input"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <p
+                  id="signupPasswordHelper"
+                  class="signup-helper-text auth-field-helper"
+                  aria-live="polite"
+                ></p>
+              </div>
+
+              <div class="auth-field">
+                <label for="signupPasswordConfirm" class="auth-label">
+                  비밀번호 확인<span class="required-mark">*</span>
+                </label>
+
+                <div class="auth-input-wrapper">
+                  <span
+                    class="material-symbols-outlined auth-input-icon"
+                    aria-hidden="true"
+                  >
+                    lock_reset
+                  </span>
+
+                  <input
+                    id="signupPasswordConfirm"
+                    class="signup-input auth-input"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <p
+                  id="signupPasswordConfirmHelper"
+                  class="signup-helper-text auth-field-helper"
+                  aria-live="polite"
+                ></p>
+              </div>
+
+              <button type="submit" class="signup-button auth-submit-button">
+                회원가입
+              </button>
+            </form>
           </div>
-        </form>
-
-        <a href="./index.html" class="login-link">로그인하러 가기</a>
+        </div>
       </section>
     </main>
 

@@ -96,7 +96,6 @@ const signupForm = document.querySelector(".signup-form");
 if (signupForm) {
   const profileImageInput = document.querySelector("#profileImageInput");
   const profileImageButton = document.querySelector(".profile-image-button");
-  const profileHelperText = document.querySelector("#profileHelperText");
   const plusIcon = document.querySelector(".plus-icon");
 
   const signupEmailInput = document.querySelector("#signupEmail");
@@ -116,39 +115,35 @@ if (signupForm) {
   const signupButton = document.querySelector(".signup-button");
 
   let selectedProfileImage = null;
-  let selectedProfileImageDataUrl = "";
 
   const signupEmailRegex = /^[A-Za-z0-9.]+@[A-Za-z0-9.]+\.[A-Za-z]+$/;
 
   const hasSpace = (value) => /\s/.test(value);
 
   const hideHelperText = (helperElement) => {
-    helperElement.textContent = "* helper text";
+    if (!helperElement) {
+      return;
+    }
+
+    helperElement.textContent = "";
     helperElement.style.visibility = "hidden";
-    helperElement.style.whiteSpace = "nowrap";
   };
 
   const showHelperText = (helperElement, message) => {
+    if (!helperElement) {
+      return;
+    }
+
     helperElement.textContent = message;
     helperElement.style.visibility = "visible";
-    helperElement.style.whiteSpace = "nowrap";
   };
 
-  showHelperText(profileHelperText, "*프로필 사진을 추가해주세요.");
+  /* 회원가입 페이지 최초 헬퍼 텍스트 숨김 */
+
   hideHelperText(signupEmailHelper);
   hideHelperText(signupPasswordHelper);
   hideHelperText(signupPasswordConfirmHelper);
   hideHelperText(signupNicknameHelper);
-
-  const validateProfileImage = () => {
-    if (!selectedProfileImage) {
-      showHelperText(profileHelperText, "*프로필 사진을 추가해주세요.");
-      return true;
-    }
-
-    hideHelperText(profileHelperText);
-    return true;
-  };
 
   const validateSignupEmail = () => {
     const email = signupEmailInput.value.trim();
@@ -173,6 +168,11 @@ if (signupForm) {
   const validateSignupPassword = () => {
     const password = signupPasswordInput.value.trim();
 
+    if (!password) {
+      showHelperText(signupPasswordHelper, "*비밀번호를 입력해주세요.");
+      return false;
+    }
+
     if (!passwordRegex.test(password)) {
       showHelperText(
         signupPasswordHelper,
@@ -192,7 +192,7 @@ if (signupForm) {
     if (!passwordConfirm) {
       showHelperText(
         signupPasswordConfirmHelper,
-        "*비밀번호를 한번더 입력해주세요",
+        "*비밀번호를 한 번 더 입력해주세요.",
       );
       return false;
     }
@@ -215,11 +215,11 @@ if (signupForm) {
     }
 
     if (hasSpace(nickname)) {
-      showHelperText(signupNicknameHelper, "*띄어쓰기를 없애주세요");
+      showHelperText(signupNicknameHelper, "*띄어쓰기를 없애주세요.");
       return false;
     }
 
-    if (nickname.length >= 11) {
+    if (nickname.length > 10) {
       showHelperText(
         signupNicknameHelper,
         "*닉네임은 최대 10자까지 작성 가능합니다.",
@@ -237,29 +237,25 @@ if (signupForm) {
     const passwordConfirm = signupPasswordConfirmInput.value.trim();
     const nickname = signupNicknameInput.value.trim();
 
-    return (
+    return Boolean(
       signupEmailRegex.test(email) &&
       passwordRegex.test(password) &&
       passwordConfirm &&
       password === passwordConfirm &&
       nickname &&
       !hasSpace(nickname) &&
-      nickname.length <= 10
+      nickname.length <= 10,
     );
   };
 
   const updateSignupButtonState = () => {
-    if (isSignupFormValid()) {
-      signupButton.style.backgroundColor = "#7f6aee";
-      return;
-    }
+    const isValid = isSignupFormValid();
 
-    signupButton.style.backgroundColor = "#aca0eb";
+    signupButton.classList.toggle("active", isValid);
   };
 
-  const resetProfileImage = () => {
+  const resetProfileImagePreview = () => {
     selectedProfileImage = null;
-    selectedProfileImageDataUrl = "";
     profileImageInput.value = "";
 
     profileImageButton.style.backgroundImage = "";
@@ -267,7 +263,20 @@ if (signupForm) {
     profileImageButton.style.backgroundPosition = "";
     profileImageButton.style.backgroundRepeat = "";
 
-    plusIcon.style.display = "block";
+    if (plusIcon) {
+      plusIcon.style.display = "flex";
+    }
+  };
+
+  const renderProfileImagePreview = (imageDataUrl) => {
+    profileImageButton.style.backgroundImage = `url(${imageDataUrl})`;
+    profileImageButton.style.backgroundSize = "cover";
+    profileImageButton.style.backgroundPosition = "center";
+    profileImageButton.style.backgroundRepeat = "no-repeat";
+
+    if (plusIcon) {
+      plusIcon.style.display = "none";
+    }
   };
 
   const signupApi = async () => {
@@ -275,6 +284,7 @@ if (signupForm) {
 
     if (selectedProfileImage) {
       const imageResponse = await uploadImageApi(selectedProfileImage);
+
       profileImageUrl = imageResponse.data.image_url;
     }
 
@@ -291,14 +301,13 @@ if (signupForm) {
     });
   };
 
-  profileImageButton.addEventListener("click", () => {
-    if (selectedProfileImage) {
-      resetProfileImage();
-      validateProfileImage();
-      updateSignupButtonState();
-      return;
-    }
+  /*
+   * 프로필 이미지 영역을 누르면 파일 선택 창을 엽니다.
+   * 기존처럼 이미지를 선택한 상태에서 다시 눌렀을 때
+   * 즉시 이미지를 삭제하지 않고 다른 이미지로 변경할 수 있습니다.
+   */
 
+  profileImageButton.addEventListener("click", () => {
     profileImageInput.click();
   });
 
@@ -306,8 +315,12 @@ if (signupForm) {
     const file = profileImageInput.files[0];
 
     if (!file) {
-      validateProfileImage();
-      updateSignupButtonState();
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있습니다.");
+      profileImageInput.value = "";
       return;
     }
 
@@ -316,17 +329,14 @@ if (signupForm) {
     const reader = new FileReader();
 
     reader.addEventListener("load", () => {
-      selectedProfileImageDataUrl = reader.result;
-
-      profileImageButton.style.backgroundImage = `url(${selectedProfileImageDataUrl})`;
+      profileImageButton.style.backgroundImage = `url(${reader.result})`;
       profileImageButton.style.backgroundSize = "cover";
       profileImageButton.style.backgroundPosition = "center";
       profileImageButton.style.backgroundRepeat = "no-repeat";
 
-      plusIcon.style.display = "none";
-
-      hideHelperText(profileHelperText);
-      updateSignupButtonState();
+      if (plusIcon) {
+        plusIcon.style.display = "none";
+      }
     });
 
     reader.readAsDataURL(file);
@@ -360,8 +370,6 @@ if (signupForm) {
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    validateProfileImage();
-
     const isEmailValid = validateSignupEmail();
     const isPasswordValid = validateSignupPassword();
     const isPasswordConfirmValid = validateSignupPasswordConfirm();
@@ -373,7 +381,7 @@ if (signupForm) {
       !isPasswordConfirmValid ||
       !isNicknameValid
     ) {
-      signupButton.style.backgroundColor = "#aca0eb";
+      signupButton.classList.remove("active");
       return;
     }
 
@@ -397,4 +405,6 @@ if (signupForm) {
       alert(message);
     }
   });
+
+  updateSignupButtonState();
 }
