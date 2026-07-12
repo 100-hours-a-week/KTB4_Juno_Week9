@@ -834,13 +834,30 @@ if (postEditForm) {
   const editPostImageInput = document.querySelector("#editPostImage");
   const editPostFileName = document.querySelector("#editPostFileName");
   const postEditHelperText = document.querySelector("#postEditHelperText");
-  const editPostSubmitButton = postEditForm.querySelector(
-    ".post-submit-button",
+
+  const editPostSubmitButton = document.querySelector(".post-submit-button");
+
+  const editPostImageDropzone = document.querySelector(
+    "#editPostImageDropzone",
+  );
+  const editPostUploadPlaceholder = document.querySelector(
+    "#editPostUploadPlaceholder",
+  );
+  const editPostImagePreview = document.querySelector("#editPostImagePreview");
+  const editPostPreviewImage = document.querySelector("#editPostPreviewImage");
+  const editPostImageRemoveButton = document.querySelector(
+    "#editPostImageRemoveButton",
   );
 
+  const postEditBackLink = document.querySelector("#postEditBackLink");
+  const postEditCancelLink = document.querySelector("#postEditCancelLink");
+
+  const params = new URLSearchParams(window.location.search);
+  const postId = params.get("post_id");
+
   let selectedEditImage = null;
-  let selectedEditImageDataUrl = "";
   let currentPostImageUrl = "";
+  let isImageRemoved = false;
   let isEditPostSubmitting = false;
 
   const setEditHelperText = (message) => {
@@ -855,15 +872,25 @@ if (postEditForm) {
     const title = editPostTitleInput.value.trim();
     const content = editPostContentTextarea.value.trim();
 
-    return title && content;
+    return Boolean(title && title.length <= 26 && content);
   };
 
   const validatePostEditForm = () => {
     const title = editPostTitleInput.value.trim();
     const content = editPostContentTextarea.value.trim();
 
-    if (!title || !content) {
-      setEditHelperText("*제목, 내용을 모두 작성해주세요");
+    if (!title) {
+      setEditHelperText("*제목을 입력해주세요.");
+      return false;
+    }
+
+    if (title.length > 26) {
+      setEditHelperText("*제목은 최대 26자까지 입력할 수 있습니다.");
+      return false;
+    }
+
+    if (!content) {
+      setEditHelperText("*내용을 입력해주세요.");
       return false;
     }
 
@@ -872,23 +899,65 @@ if (postEditForm) {
   };
 
   const updateEditSubmitButtonState = () => {
-    editPostSubmitButton.disabled = isEditPostSubmitting;
-
-    if (isEditPostSubmitting) {
-      editPostSubmitButton.style.backgroundColor = "#aca0eb";
-      return;
-    }
-
-    if (isPostEditFormValid()) {
-      editPostSubmitButton.style.backgroundColor = "#7f6aee";
-      return;
-    }
-
-    editPostSubmitButton.style.backgroundColor = "#aca0eb";
+    editPostSubmitButton.disabled =
+      isEditPostSubmitting || !isPostEditFormValid();
   };
 
-  const params = new URLSearchParams(window.location.search);
-  const postId = params.get("post_id");
+  const showEditImagePreview = (imageUrl) => {
+    editPostPreviewImage.src = imageUrl;
+    editPostImagePreview.classList.add("show");
+    editPostUploadPlaceholder.style.display = "none";
+  };
+
+  const hideEditImagePreview = () => {
+    editPostPreviewImage.removeAttribute("src");
+    editPostImagePreview.classList.remove("show");
+    editPostUploadPlaceholder.style.display = "flex";
+  };
+
+  const resetEditImage = () => {
+    selectedEditImage = null;
+    currentPostImageUrl = "";
+    isImageRemoved = true;
+
+    editPostImageInput.value = "";
+    editPostFileName.textContent = "선택된 이미지가 없습니다.";
+
+    hideEditImagePreview();
+  };
+
+  const renderSelectedEditImage = (file) => {
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+      showEditImagePreview(reader.result);
+    });
+
+    reader.addEventListener("error", () => {
+      alert("이미지를 불러오지 못했습니다.");
+      resetEditImage();
+    });
+
+    reader.readAsDataURL(file);
+  };
+
+  const selectEditImage = (file) => {
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 선택할 수 있습니다.");
+      editPostImageInput.value = "";
+      return;
+    }
+
+    selectedEditImage = file;
+    isImageRemoved = false;
+
+    editPostFileName.textContent = file.name;
+    renderSelectedEditImage(file);
+  };
 
   const getPostDetailApi = async () => {
     return await request(`/posts/${postId}`);
@@ -897,8 +966,13 @@ if (postEditForm) {
   const updatePostApi = async () => {
     let imageUrl = currentPostImageUrl;
 
+    if (isImageRemoved) {
+      imageUrl = "";
+    }
+
     if (selectedEditImage) {
       const imageResponse = await uploadImageApi(selectedEditImage);
+
       imageUrl = imageResponse.data.image_url;
     }
 
@@ -915,14 +989,16 @@ if (postEditForm) {
   };
 
   const renderEditPost = (post) => {
-    editPostTitleInput.value = post.title;
-    editPostContentTextarea.value = post.content;
-    currentPostImageUrl = post.image || "";
+    editPostTitleInput.value = post.title ?? "";
+    editPostContentTextarea.value = post.content ?? "";
+    currentPostImageUrl = post.image ?? "";
 
-    if (post.image) {
+    if (currentPostImageUrl) {
+      showEditImagePreview(getFullImageUrl(currentPostImageUrl));
       editPostFileName.textContent = "기존 이미지";
     } else {
-      editPostFileName.textContent = "파일을 선택해주세요.";
+      hideEditImagePreview();
+      editPostFileName.textContent = "선택된 이미지가 없습니다.";
     }
 
     updateEditSubmitButtonState();
@@ -945,7 +1021,18 @@ if (postEditForm) {
     }
   };
 
+  if (postId) {
+    const detailPageUrl = `./post-detail.html?post_id=${postId}`;
+
+    postEditBackLink.href = detailPageUrl;
+    postEditCancelLink.href = detailPageUrl;
+  }
+
   editPostTitleInput.addEventListener("input", () => {
+    if (editPostTitleInput.value.length > 26) {
+      editPostTitleInput.value = editPostTitleInput.value.slice(0, 26);
+    }
+
     clearEditHelperText();
     updateEditSubmitButtonState();
   });
@@ -955,32 +1042,43 @@ if (postEditForm) {
     updateEditSubmitButtonState();
   });
 
-  editPostImageInput.addEventListener("change", () => {
-    const file = editPostImageInput.files[0];
-
-    if (!file) {
-      selectedEditImage = null;
-      selectedEditImageDataUrl = "";
-
-      if (currentPostImageUrl) {
-        editPostFileName.textContent = "기존 이미지";
-      } else {
-        editPostFileName.textContent = "파일을 선택해주세요.";
-      }
-
+  editPostImageDropzone.addEventListener("click", (event) => {
+    if (event.target.closest("#editPostImageRemoveButton")) {
       return;
     }
 
-    selectedEditImage = file;
-    editPostFileName.textContent = file.name;
+    editPostImageInput.click();
+  });
 
-    const reader = new FileReader();
+  editPostImageInput.addEventListener("change", () => {
+    const file = editPostImageInput.files[0];
 
-    reader.addEventListener("load", () => {
-      selectedEditImageDataUrl = reader.result;
+    selectEditImage(file);
+  });
+
+  editPostImageRemoveButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    resetEditImage();
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    editPostImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      editPostImageDropzone.classList.add("drag-over");
     });
+  });
 
-    reader.readAsDataURL(file);
+  ["dragleave", "drop"].forEach((eventName) => {
+    editPostImageDropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      editPostImageDropzone.classList.remove("drag-over");
+    });
+  });
+
+  editPostImageDropzone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+
+    selectEditImage(file);
   });
 
   postEditForm.addEventListener("submit", async (event) => {
@@ -993,7 +1091,7 @@ if (postEditForm) {
     const isValid = validatePostEditForm();
 
     if (!isValid) {
-      editPostSubmitButton.style.backgroundColor = "#aca0eb";
+      updateEditSubmitButtonState();
       return;
     }
 
@@ -1013,7 +1111,6 @@ if (postEditForm) {
       window.location.href = `./post-detail.html?post_id=${postId}`;
     } catch (error) {
       setEditHelperText(`*${error.message}`);
-      editPostSubmitButton.style.backgroundColor = "#aca0eb";
     } finally {
       isEditPostSubmitting = false;
       updateEditSubmitButtonState();
