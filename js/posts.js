@@ -25,13 +25,14 @@ const setBackgroundImage = (element, imageUrl) => {
   element.style.backgroundPosition = "center";
   element.style.backgroundRepeat = "no-repeat";
 };
-
 const formatCount = (count) => {
-  if (count >= 1000) {
-    return `${Math.floor(count / 1000)}k`;
+  const safeCount = Number(count ?? 0);
+
+  if (safeCount >= 1000) {
+    return `${Math.floor(safeCount / 1000)}k`;
   }
 
-  return String(count);
+  return String(safeCount);
 };
 
 /* 게시글 목록 페이지 API 연동 */
@@ -197,6 +198,9 @@ if (postDetailTitle) {
   const postDetailCommentCount = document.querySelector(
     "#postDetailCommentCount",
   );
+  const postDetailCommentCountBadge = document.querySelector(
+    "#postDetailCommentCountBadge",
+  );
   const detailLikeStatCard = document.querySelector(".like-stat-card");
   const postEditLink = document.querySelector("#postEditLink");
   const commentList = document.querySelector("#commentList");
@@ -240,32 +244,47 @@ if (postDetailTitle) {
 
     comments.forEach((comment) => {
       const commentItem = document.createElement("article");
+
       commentItem.className = "comment-item";
       commentItem.dataset.commentId = comment.comment_id;
 
       commentItem.innerHTML = `
-        <div class="comment-main">
-          <div class="comment-profile-image"></div>
+      <div class="comment-main">
+        <div class="comment-profile-image"></div>
 
-          <div class="comment-content-box">
-            <div class="comment-meta-row">
-              <span class="comment-author-name">${comment.author_nickname}</span>
-              <time class="comment-date">${comment.created_at}</time>
-            </div>
+        <div class="comment-content-box">
+          <div class="comment-meta-row">
+            <span class="comment-author-name">
+              ${comment.author_nickname}
+            </span>
 
-            <p class="comment-content">${comment.content}</p>
+            <time class="comment-date">
+              ${comment.created_at}
+            </time>
           </div>
-        </div>
 
-        <div class="comment-actions">
-          <button type="button" class="post-detail-action-button comment-edit-button">
-            <span class="post-detail-action-text">수정</span>
-          </button>
-          <button type="button" class="post-detail-action-button comment-delete-button">
-            <span class="post-detail-action-text">삭제</span>
-          </button>
+          <p class="comment-content">${comment.content}</p>
         </div>
-      `;
+      </div>
+
+      <div class="comment-actions">
+        <button
+          type="button"
+          class="comment-action-button comment-edit-button"
+          aria-label="댓글 수정"
+        >
+          <span class="material-symbols-outlined">edit</span>
+        </button>
+
+        <button
+          type="button"
+          class="comment-action-button comment-delete-button"
+          aria-label="댓글 삭제"
+        >
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+    `;
 
       const commentProfileImage = commentItem.querySelector(
         ".comment-profile-image",
@@ -276,7 +295,6 @@ if (postDetailTitle) {
       commentList.appendChild(commentItem);
     });
   };
-
   const updateComments = (comments) => {
     currentComments = comments;
     renderComments(currentComments);
@@ -286,22 +304,21 @@ if (postDetailTitle) {
     postDetailLikeCount.textContent = formatCount(likeCount);
     likeState.liked = liked;
 
-    if (likeState.liked) {
-      detailLikeStatCard.style.backgroundColor = "#aca0eb";
-      return;
-    }
-
-    detailLikeStatCard.style.backgroundColor = "#d9d9d9";
+    detailLikeStatCard.classList.toggle("liked", liked);
   };
 
   const reloadComments = async () => {
     const response = await getPostDetailApi();
+    const comments = response.data.comments ?? [];
+    const commentCount = response.data.comment_count ?? comments.length;
 
-    updateComments(response.data.comments || []);
+    updateComments(comments);
 
-    postDetailCommentCount.textContent = formatCount(
-      response.data.comment_count,
-    );
+    postDetailCommentCount.textContent = formatCount(commentCount);
+
+    if (postDetailCommentCountBadge) {
+      postDetailCommentCountBadge.textContent = formatCount(commentCount);
+    }
   };
 
   const isPostOwner = (authorId) => {
@@ -324,19 +341,30 @@ if (postDetailTitle) {
   };
 
   const renderPostDetail = (post) => {
-    postDetailTitle.textContent = post.title;
-    postDetailAuthorName.textContent = post.author_nickname;
-    postDetailDate.textContent = post.created_at;
-    postDetailContent.textContent = post.content;
+    const comments = post.comments ?? [];
 
-    postDetailViewCount.textContent = formatCount(post.view_count);
-    postDetailCommentCount.textContent = formatCount(post.comment_count);
+    const likeCount = post.likeCount ?? 0;
+    const viewCount = post.viewCount ?? 0;
+    const commentCount = post.commentCount ?? comments.length;
 
-    updateLikeState(post.like_count, post.liked);
+    postDetailTitle.textContent = post.title ?? "";
+    postDetailAuthorName.textContent = post.nickname ?? "";
+    postDetailDate.textContent = post.createdAt ?? "";
+    postDetailContent.textContent = post.content ?? "";
 
-    postEditLink.href = `./post-edit.html?post_id=${post.post_id}`;
+    postDetailViewCount.textContent = formatCount(viewCount);
+    postDetailCommentCount.textContent = formatCount(commentCount);
 
-    setBackgroundImage(postDetailAuthorImage, post.author_profile_image);
+    if (postDetailCommentCountBadge) {
+      postDetailCommentCountBadge.textContent = formatCount(commentCount);
+    }
+
+    updateLikeState(likeCount, post.liked ?? false);
+
+    postEditLink.href = `./post-edit.html?post_id=${post.postId}`;
+
+    setBackgroundImage(postDetailAuthorImage, post.profileImage);
+
     if (post.image) {
       setPostDetailImage(postDetailImage, post.image);
       postDetailImage.style.display = "flex";
@@ -344,8 +372,8 @@ if (postDetailTitle) {
       postDetailImage.style.display = "none";
     }
 
-    updateComments(post.comments || []);
-    updatePostActionVisibility(post.author_id);
+    updateComments(comments);
+    updatePostActionVisibility(post.authorId);
   };
 
   const loadPostDetail = async () => {
@@ -423,19 +451,14 @@ if (postDetailTitle) {
     const updateCommentButtonState = () => {
       const commentText = commentTextarea.value.trim();
 
-      commentSubmitButton.disabled = isCommentSubmitting;
+      commentSubmitButton.disabled = isCommentSubmitting || !commentText;
 
-      if (isCommentSubmitting) {
-        commentSubmitButton.style.backgroundColor = "#aca0eb";
+      if (isCommentSubmitting || !commentText) {
+        commentSubmitButton.style.backgroundColor = "#c8c6c6";
         return;
       }
 
-      if (commentText) {
-        commentSubmitButton.style.backgroundColor = "#7f6aee";
-        return;
-      }
-
-      commentSubmitButton.style.backgroundColor = "#aca0eb";
+      commentSubmitButton.style.backgroundColor = "#b71422";
     };
 
     const startEditComment = (commentId) => {

@@ -3,157 +3,269 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>게시글 상세</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+      rel="stylesheet"
+    />
 
     <link rel="stylesheet" href="./css/common.css" />
     <link rel="stylesheet" href="./css/posts.css" />
   </head>
-  <body>
-    <header class="header">
-      <a
-        href="./posts.html"
-        class="header-back-button"
-        aria-label="게시글 목록으로 이동"
-      >
-        &lt;
-      </a>
 
-      <h1 class="header-title">아무 말 대잔치</h1>
+  <body class="post-detail-body">
+    <header class="board-header detail-board-header" id="detailTopHeader">
+      <div class="board-header-left">
+        <a
+          href="./posts.html"
+          class="board-header-back-button"
+          aria-label="게시글 목록으로 이동"
+        >
+          <span class="material-symbols-outlined">arrow_back</span>
+        </a>
 
-      <button
-        class="header-profile-button"
-        type="button"
-        aria-label="회원 메뉴"
-      >
-        <span class="header-profile-image"></span>
-      </button>
-      <nav class="header-profile-menu" aria-label="회원 메뉴">
-        <a href="./profile-edit.html" class="header-profile-menu-item">
-          회원정보수정
-        </a>
-        <a href="./password-edit.html" class="header-profile-menu-item">
-          비밀번호수정
-        </a>
-        <button type="button" class="header-profile-menu-item logout-button">
-          로그아웃
+        <h1 class="board-header-title">Community</h1>
+      </div>
+
+      <div class="board-profile-area">
+        <button
+          class="header-profile-button board-profile-button"
+          type="button"
+          aria-label="회원 메뉴"
+        >
+          <span class="header-profile-image board-profile-image"></span>
         </button>
-      </nav>
+
+        <nav
+          class="header-profile-menu board-profile-menu"
+          aria-label="회원 메뉴"
+        >
+          <a href="./profile-edit.html" class="header-profile-menu-item">
+            회원정보 수정
+          </a>
+
+          <a href="./password-edit.html" class="header-profile-menu-item">
+            비밀번호 수정
+          </a>
+
+          <button type="button" class="header-profile-menu-item logout-button">
+            로그아웃
+          </button>
+        </nav>
+      </div>
     </header>
 
     <main class="post-detail-page">
       <section class="post-detail-section">
-        <div class="post-detail-header">
-          <h2 class="post-detail-title" id="postDetailTitle"></h2>
+        <article class="post-detail-card">
+          <div class="post-detail-image" id="postDetailImage"></div>
 
-          <div class="post-detail-meta-row">
-            <div class="post-detail-author">
-              <div
-                class="post-detail-author-image"
-                id="postDetailAuthorImage"
-              ></div>
-              <span
-                class="post-detail-author-name"
-                id="postDetailAuthorName"
-              ></span>
-              <time class="post-detail-date" id="postDetailDate"></time>
+          <div class="post-detail-card-content">
+            <div class="post-detail-header">
+              <div class="post-detail-heading">
+                <h2 class="post-detail-title" id="postDetailTitle"></h2>
+
+                <div class="post-detail-author">
+                  <div
+                    class="post-detail-author-image"
+                    id="postDetailAuthorImage"
+                  ></div>
+
+                  <div class="post-detail-author-info">
+                    <span
+                      class="post-detail-author-name"
+                      id="postDetailAuthorName"
+                    ></span>
+
+                    <time class="post-detail-date" id="postDetailDate"></time>
+                  </div>
+                </div>
+              </div>
+
+              <div class="post-detail-actions">
+                <a
+                  href="./post-edit.html"
+                  class="post-detail-action-button"
+                  id="postEditLink"
+                  aria-label="게시글 수정"
+                >
+                  <span class="material-symbols-outlined">edit</span>
+                </a>
+
+                <button
+                  type="button"
+                  class="post-detail-action-button post-delete-button"
+                  aria-label="게시글 삭제"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
             </div>
 
-            <div class="post-detail-actions">
-              <a
-                href="./post-edit.html"
-                class="post-detail-action-button"
-                id="postEditLink"
-              >
-                <span class="post-detail-action-text">수정</span>
-              </a>
+            <p class="post-detail-content" id="postDetailContent"></p>
+
+            <div class="post-detail-stats">
               <button
                 type="button"
-                class="post-detail-action-button post-delete-button"
+                class="post-detail-stat-item like-stat-card"
               >
-                <span class="post-detail-action-text">삭제</span>
+                <span
+                  class="material-symbols-outlined post-detail-stat-icon like-icon"
+                >
+                  favorite
+                </span>
+
+                <span class="post-detail-stat-text">
+                  <strong
+                    class="post-detail-stat-number"
+                    id="postDetailLikeCount"
+                  >
+                    0
+                  </strong>
+                  좋아요
+                </span>
               </button>
+
+              <div class="post-detail-stat-item">
+                <span class="material-symbols-outlined post-detail-stat-icon">
+                  chat_bubble
+                </span>
+
+                <span class="post-detail-stat-text">
+                  <strong
+                    class="post-detail-stat-number"
+                    id="postDetailCommentCount"
+                  >
+                    0
+                  </strong>
+                  댓글
+                </span>
+              </div>
+
+              <div class="post-detail-stat-item">
+                <span class="material-symbols-outlined post-detail-stat-icon">
+                  visibility
+                </span>
+
+                <span class="post-detail-stat-text">
+                  <strong
+                    class="post-detail-stat-number"
+                    id="postDetailViewCount"
+                  >
+                    0
+                  </strong>
+                  조회
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </article>
 
-        <div class="post-detail-divider"></div>
-        <div class="post-detail-image" id="postDetailImage"></div>
+        <section class="comments-section">
+          <h3 class="comments-title">
+            댓글
+            <span class="comments-count-badge" id="postDetailCommentCountBadge">
+              0
+            </span>
+          </h3>
 
-        <p class="post-detail-content" id="postDetailContent"></p>
-        <div class="post-detail-stats">
-          <button type="button" class="post-detail-stat-card like-stat-card">
-            <strong
-              class="post-detail-stat-number like-count"
-              id="postDetailLikeCount"
-            >0</strong>
-            <span class="post-detail-stat-label">좋아요수</span>
-          </button>
+          <form class="comment-create-form">
+            <div class="comment-writer-profile">
+              <span class="material-symbols-outlined">person</span>
+            </div>
 
-          <div class="post-detail-stat-card">
-            <strong
-              class="post-detail-stat-number view-count"
-              id="postDetailViewCount"
-            >0</strong>
-            <span class="post-detail-stat-label">조회수</span>
-          </div>
+            <div class="comment-create-content">
+              <textarea
+                class="comment-create-textarea"
+                placeholder="댓글을 남겨주세요."
+              ></textarea>
 
-          <div class="post-detail-stat-card">
-            <strong
-              class="post-detail-stat-number comment-count"
-              id="postDetailCommentCount"
-            >0</strong>
-            <span class="post-detail-stat-label">댓글</span>
-          </div>
-        </div>
-        <div class="post-detail-bottom-divider"></div>
+              <div class="comment-create-footer">
+                <button type="submit" class="comment-create-button">
+                  댓글 등록
+                </button>
+              </div>
+            </div>
+          </form>
 
-        <form class="comment-create-form">
-          <textarea
-            class="comment-create-textarea"
-            placeholder="댓글을 남겨주세요!"
-          ></textarea>
-
-          <div class="comment-create-divider"></div>
-
-          <div class="comment-create-button-area">
-            <button type="submit" class="comment-create-button">
-              댓글 등록
-            </button>
-          </div>
-        </form>
-        <div class="comment-list" id="commentList"></div>
+          <div class="comment-list" id="commentList"></div>
+        </section>
       </section>
     </main>
+
     <div class="modal-backdrop" id="commentDeleteModal">
       <div class="delete-modal">
         <h3 class="delete-modal-title">댓글을 삭제하시겠습니까?</h3>
+
         <p class="delete-modal-description">
-          삭제한 내용은 복구 할 수 없습니다.
+          삭제한 내용은 복구할 수 없습니다.
         </p>
 
         <div class="delete-modal-actions">
           <button type="button" class="delete-modal-cancel-button">취소</button>
+
           <button type="button" class="delete-modal-confirm-button">
             확인
           </button>
         </div>
       </div>
     </div>
+
     <div class="modal-backdrop" id="postDeleteModal">
       <div class="delete-modal">
         <h3 class="delete-modal-title">게시글을 삭제하시겠습니까?</h3>
+
         <p class="delete-modal-description">
-          삭제한 내용은 복구 할 수 없습니다.
+          삭제한 내용은 복구할 수 없습니다.
         </p>
 
         <div class="delete-modal-actions">
           <button type="button" class="delete-modal-cancel-button">취소</button>
+
           <button type="button" class="delete-modal-confirm-button">
             확인
           </button>
         </div>
       </div>
     </div>
+
+    <nav class="board-bottom-navigation" aria-label="하단 메뉴">
+      <button type="button" class="board-navigation-item" disabled>
+        <span class="material-symbols-outlined">home</span>
+        <span>홈</span>
+      </button>
+
+      <a
+        href="./posts.html"
+        class="board-navigation-item active"
+        aria-current="page"
+      >
+        <span
+          class="material-symbols-outlined"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+        >
+          forum
+        </span>
+        <span>게시판</span>
+      </a>
+
+      <button type="button" class="board-navigation-item" disabled>
+        <span class="material-symbols-outlined">bookmark</span>
+        <span>북마크</span>
+      </button>
+
+      <a href="./profile-edit.html" class="board-navigation-item">
+        <span class="material-symbols-outlined">person</span>
+        <span>프로필</span>
+      </a>
+    </nav>
+
     <script src="./js/config.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/common.js"></script>
