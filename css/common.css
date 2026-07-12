@@ -167,3 +167,64 @@ p {
 .header-profile-menu-item:hover {
   background-color: #c9c9c9;
 }
+
+/* 모바일 화면 기준 공통 헤더 */
+
+.header {
+  left: 50%;
+  width: min(100%, 430px);
+  height: 64px;
+  margin: 0 auto;
+  padding: 0 20px;
+
+  border-bottom: none;
+  background-color: rgba(248, 249, 250, 0.96);
+
+  justify-content: center;
+
+  transform: translateX(-50%);
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: #b71422;
+}
+
+.header-back-button {
+  left: 20px;
+}
+
+.header-profile-button {
+  right: 20px;
+  left: auto;
+
+  width: 40px;
+  height: 40px;
+}
+
+.header-profile-image {
+  width: 40px;
+  height: 40px;
+}
+
+.header-profile-menu {
+  top: 56px;
+  right: 20px;
+  left: auto;
+
+  width: 140px;
+  overflow: hidden;
+
+  border-radius: 12px;
+  background-color: #ffffff;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.header-profile-menu-item {
+  width: 100%;
+  height: 42px;
+  background-color: #ffffff;
+}
