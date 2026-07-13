@@ -30,10 +30,18 @@ const renderHeaderProfileImage = (profileImageUrl) => {
     return;
   }
 
-  headerProfileImage.style.backgroundImage = `url(${API_BASE_URL}${profileImageUrl})`;
+  const fullProfileImageUrl = profileImageUrl.startsWith("http")
+    ? profileImageUrl
+    : `${API_BASE_URL}${profileImageUrl}`;
+
+  headerProfileImage.style.backgroundImage = `url(${fullProfileImageUrl})`;
   headerProfileImage.style.backgroundSize = "cover";
   headerProfileImage.style.backgroundPosition = "center";
   headerProfileImage.style.backgroundRepeat = "no-repeat";
+};
+
+const getProfileImageFromUser = (user) => {
+  return user?.profileImage ?? user?.profile_image ?? "";
 };
 
 const loadHeaderProfile = async () => {
@@ -46,7 +54,7 @@ const loadHeaderProfile = async () => {
   try {
     const response = await getMyProfileApi();
 
-    renderHeaderProfileImage(response.data.profile_image);
+    renderHeaderProfileImage(getProfileImageFromUser(response.data));
   } catch (error) {
     console.error(error.message);
   }
