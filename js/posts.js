@@ -25,6 +25,27 @@ const setBackgroundImage = (element, imageUrl) => {
   element.style.backgroundPosition = "center";
   element.style.backgroundRepeat = "no-repeat";
 };
+
+const pickField = (source, ...keys) => {
+  if (!source) {
+    return undefined;
+  }
+
+  for (const key of keys) {
+    if (source[key] !== undefined && source[key] !== null) {
+      return source[key];
+    }
+  }
+
+  return undefined;
+};
+
+const getPostId = (post) => pickField(post, "postId", "post_id", "id");
+const getCommentId = (comment) =>
+  pickField(comment, "commentId", "comment_id", "id");
+const getImageUrlFromResponse = (response) =>
+  pickField(response?.data, "imageUrl", "image_url") ?? "";
+
 const formatCount = (count) => {
   const safeCount = Number(count ?? 0);
 
@@ -63,8 +84,26 @@ if (postList) {
 
     posts.forEach((post) => {
       const postCardLink = document.createElement("a");
+      const postId = getPostId(post);
+      const authorNickname = pickField(
+        post,
+        "authorNickname",
+        "author_nickname",
+        "nickname",
+      );
+      const authorProfileImage = pickField(
+        post,
+        "authorProfileImage",
+        "author_profile_image",
+        "profileImage",
+        "profile_image",
+      );
+      const createdAt = pickField(post, "createdAt", "created_at");
+      const likeCount = pickField(post, "likeCount", "like_count");
+      const commentCount = pickField(post, "commentCount", "comment_count");
+      const viewCount = pickField(post, "viewCount", "view_count");
 
-      postCardLink.href = `./post-detail.html?post_id=${post.post_id}`;
+      postCardLink.href = `./post-detail.html?post_id=${postId}`;
       postCardLink.className = "post-card-link";
 
       postCardLink.innerHTML = `
@@ -75,11 +114,11 @@ if (postList) {
 
               <div class="post-author-info">
                 <span class="post-author-name">
-                  ${post.author_nickname}
+                  ${authorNickname ?? ""}
                 </span>
 
                 <time class="post-date">
-                  ${post.created_at}
+                  ${createdAt ?? ""}
                 </time>
               </div>
             </div>
@@ -99,7 +138,7 @@ if (postList) {
                   favorite
                 </span>
 
-                <span>${formatCount(post.like_count)}</span>
+                <span>${formatCount(likeCount)}</span>
               </span>
 
               <span class="post-stat">
@@ -107,7 +146,7 @@ if (postList) {
                   forum
                 </span>
 
-                <span>${formatCount(post.comment_count)}</span>
+                <span>${formatCount(commentCount)}</span>
               </span>
 
               <span class="post-stat">
@@ -115,7 +154,7 @@ if (postList) {
                   visibility
                 </span>
 
-                <span>${formatCount(post.view_count)}</span>
+                <span>${formatCount(viewCount)}</span>
               </span>
             </div>
           </div>
@@ -127,7 +166,7 @@ if (postList) {
       const postAuthorImage = postCardLink.querySelector(".post-author-image");
       const postThumbnail = postCardLink.querySelector(".post-thumbnail");
 
-      setBackgroundImage(postAuthorImage, post.author_profile_image);
+      setBackgroundImage(postAuthorImage, authorProfileImage);
 
       if (post.image) {
         setBackgroundImage(postThumbnail, post.image);
@@ -244,9 +283,24 @@ if (postDetailTitle) {
 
     comments.forEach((comment) => {
       const commentItem = document.createElement("article");
+      const commentId = getCommentId(comment);
+      const commentAuthorNickname = pickField(
+        comment,
+        "authorNickname",
+        "author_nickname",
+        "nickname",
+      );
+      const commentAuthorProfileImage = pickField(
+        comment,
+        "authorProfileImage",
+        "author_profile_image",
+        "profileImage",
+        "profile_image",
+      );
+      const commentCreatedAt = pickField(comment, "createdAt", "created_at");
 
       commentItem.className = "comment-item";
-      commentItem.dataset.commentId = comment.comment_id;
+      commentItem.dataset.commentId = commentId;
 
       commentItem.innerHTML = `
       <div class="comment-main">
@@ -255,11 +309,11 @@ if (postDetailTitle) {
         <div class="comment-content-box">
           <div class="comment-meta-row">
             <span class="comment-author-name">
-              ${comment.author_nickname}
+              ${commentAuthorNickname ?? ""}
             </span>
 
             <time class="comment-date">
-              ${comment.created_at}
+              ${commentCreatedAt ?? ""}
             </time>
           </div>
 
@@ -290,7 +344,7 @@ if (postDetailTitle) {
         ".comment-profile-image",
       );
 
-      setBackgroundImage(commentProfileImage, comment.author_profile_image);
+      setBackgroundImage(commentProfileImage, commentAuthorProfileImage);
 
       commentList.appendChild(commentItem);
     });
@@ -310,7 +364,9 @@ if (postDetailTitle) {
   const reloadComments = async () => {
     const response = await getPostDetailApi();
     const comments = response.data.comments ?? [];
-    const commentCount = response.data.comment_count ?? comments.length;
+    const commentCount =
+      pickField(response.data, "commentCount", "comment_count") ??
+      comments.length;
 
     updateComments(comments);
 
@@ -343,13 +399,30 @@ if (postDetailTitle) {
   const renderPostDetail = (post) => {
     const comments = post.comments ?? [];
 
-    const likeCount = post.likeCount ?? 0;
-    const viewCount = post.viewCount ?? 0;
-    const commentCount = post.commentCount ?? comments.length;
+    const renderedPostId = getPostId(post);
+    const authorId = pickField(post, "authorId", "author_id", "userId", "user_id");
+    const authorNickname = pickField(
+      post,
+      "nickname",
+      "authorNickname",
+      "author_nickname",
+    );
+    const authorProfileImage = pickField(
+      post,
+      "profileImage",
+      "profile_image",
+      "authorProfileImage",
+      "author_profile_image",
+    );
+    const createdAt = pickField(post, "createdAt", "created_at");
+    const likeCount = pickField(post, "likeCount", "like_count") ?? 0;
+    const viewCount = pickField(post, "viewCount", "view_count") ?? 0;
+    const commentCount =
+      pickField(post, "commentCount", "comment_count") ?? comments.length;
 
     postDetailTitle.textContent = post.title ?? "";
-    postDetailAuthorName.textContent = post.nickname ?? "";
-    postDetailDate.textContent = post.createdAt ?? "";
+    postDetailAuthorName.textContent = authorNickname ?? "";
+    postDetailDate.textContent = createdAt ?? "";
     postDetailContent.textContent = post.content ?? "";
 
     postDetailViewCount.textContent = formatCount(viewCount);
@@ -361,9 +434,9 @@ if (postDetailTitle) {
 
     updateLikeState(likeCount, post.liked ?? false);
 
-    postEditLink.href = `./post-edit.html?post_id=${post.postId}`;
+    postEditLink.href = `./post-edit.html?post_id=${renderedPostId}`;
 
-    setBackgroundImage(postDetailAuthorImage, post.profileImage);
+    setBackgroundImage(postDetailAuthorImage, authorProfileImage);
 
     if (post.image) {
       setPostDetailImage(postDetailImage, post.image);
@@ -373,7 +446,7 @@ if (postDetailTitle) {
     }
 
     updateComments(comments);
-    updatePostActionVisibility(post.authorId);
+    updatePostActionVisibility(authorId);
   };
 
   const loadPostDetail = async () => {
@@ -462,16 +535,16 @@ if (postDetailTitle) {
     };
 
     const startEditComment = (commentId) => {
-      const comment = currentComments.find(
-        (currentComment) =>
-          String(currentComment.comment_id) === String(commentId),
-      );
+    const comment = currentComments.find(
+      (currentComment) =>
+          String(getCommentId(currentComment)) === String(commentId),
+    );
 
       if (!comment) {
         return;
       }
 
-      editingCommentId = comment.comment_id;
+      editingCommentId = getCommentId(comment);
       commentTextarea.value = comment.content;
       commentSubmitButton.textContent = "댓글 수정";
       updateCommentButtonState();
@@ -497,7 +570,10 @@ if (postDetailTitle) {
           ? await deleteLikeApi()
           : await addLikeApi();
 
-        updateLikeState(response.data.like_count, response.data.liked);
+        updateLikeState(
+          pickField(response.data, "likeCount", "like_count"),
+          response.data.liked,
+        );
       } catch (error) {
         alert(error.message);
       } finally {
@@ -728,7 +804,7 @@ if (postCreateForm) {
     if (selectedPostImage) {
       const imageResponse = await uploadImageApi(selectedPostImage);
 
-      imageUrl = imageResponse.data.image_url;
+      imageUrl = getImageUrlFromResponse(imageResponse);
     }
 
     const body = {
@@ -973,7 +1049,7 @@ if (postEditForm) {
     if (selectedEditImage) {
       const imageResponse = await uploadImageApi(selectedEditImage);
 
-      imageUrl = imageResponse.data.image_url;
+      imageUrl = getImageUrlFromResponse(imageResponse);
     }
 
     const body = {

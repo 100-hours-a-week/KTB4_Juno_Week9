@@ -5,6 +5,18 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{};':"\\|,.<>/?]).{8,20}$/;
 
+const getUploadedImageUrl = (response) => {
+  return response?.data?.imageUrl ?? response?.data?.image_url ?? "";
+};
+
+const getSigninUserId = (response) => {
+  return response?.data?.userId ?? response?.data?.user_id ?? "";
+};
+
+const getSigninAccessToken = (response) => {
+  return response?.data?.accessToken ?? response?.data?.access_token ?? "";
+};
+
 /* 로그인 페이지 이벤트 */
 
 const loginForm = document.querySelector(".login-form");
@@ -79,8 +91,8 @@ if (loginForm) {
     try {
       const response = await signinApi();
 
-      localStorage.setItem("userId", response.data.user_id);
-      localStorage.setItem("accessToken", response.data.access_token);
+      localStorage.setItem("userId", getSigninUserId(response));
+      localStorage.setItem("accessToken", getSigninAccessToken(response));
 
       window.location.href = "./posts.html";
     } catch (error) {
@@ -286,7 +298,7 @@ if (signupForm) {
     if (selectedProfileImage) {
       const imageResponse = await uploadImageApi(selectedProfileImage);
 
-      profileImageUrl = imageResponse.data.image_url;
+      profileImageUrl = getUploadedImageUrl(imageResponse);
     }
 
     const body = {

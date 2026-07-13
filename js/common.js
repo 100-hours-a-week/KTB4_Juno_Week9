@@ -30,23 +30,31 @@ const renderHeaderProfileImage = (profileImageUrl) => {
     return;
   }
 
-  headerProfileImage.style.backgroundImage = `url(${API_BASE_URL}${profileImageUrl})`;
+  const fullProfileImageUrl = profileImageUrl.startsWith("http")
+    ? profileImageUrl
+    : `${API_BASE_URL}${profileImageUrl}`;
+
+  headerProfileImage.style.backgroundImage = `url(${fullProfileImageUrl})`;
   headerProfileImage.style.backgroundSize = "cover";
   headerProfileImage.style.backgroundPosition = "center";
   headerProfileImage.style.backgroundRepeat = "no-repeat";
 };
 
-const loadHeaderProfile = async () => {
-  const userId = localStorage.getItem("userId");
+const getProfileImageFromUser = (user) => {
+  return user?.profileImage ?? user?.profile_image ?? "";
+};
 
-  if (!userId) {
+const loadHeaderProfile = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  if (!accessToken) {
     return;
   }
 
   try {
     const response = await getMyProfileApi();
 
-    renderHeaderProfileImage(response.data.profile_image);
+    renderHeaderProfileImage(getProfileImageFromUser(response.data));
   } catch (error) {
     console.error(error.message);
   }
@@ -66,6 +74,7 @@ if (logoutButton) {
       console.error(error.message);
     } finally {
       localStorage.removeItem("userId");
+      localStorage.removeItem("accessToken");
       window.location.href = "./index.html";
     }
   });
