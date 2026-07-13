@@ -37,9 +37,9 @@ const renderHeaderProfileImage = (profileImageUrl) => {
 };
 
 const loadHeaderProfile = async () => {
-  const userId = localStorage.getItem("userId");
+  const accessToken = localStorage.getItem("accessToken");
 
-  if (!userId) {
+  if (!accessToken) {
     return;
   }
 
@@ -66,6 +66,7 @@ if (logoutButton) {
       console.error(error.message);
     } finally {
       localStorage.removeItem("userId");
+      localStorage.removeItem("accessToken");
       window.location.href = "./index.html";
     }
   });
