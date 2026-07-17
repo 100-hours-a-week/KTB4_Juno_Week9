@@ -1,12 +1,4 @@
-/* 공통 이미지 렌더링 */
-
-const getFullImageUrl = (imageUrl) => {
-  if (!imageUrl) {
-    return "";
-  }
-
-  return imageUrl.startsWith("http") ? imageUrl : `${API_BASE_URL}${imageUrl}`;
-};
+/* 이미지 렌더링 */
 
 const setBackgroundImage = (element, imageUrl) => {
   if (!element) {

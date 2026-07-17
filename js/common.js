@@ -1,5 +1,13 @@
 /* 헤더 프로필 드롭다운 이벤트 */
 
+const getFullImageUrl = (imageUrl) => {
+  if (!imageUrl) {
+    return "";
+  }
+
+  return imageUrl.startsWith("http") ? imageUrl : `${API_BASE_URL}${imageUrl}`;
+};
+
 const headerProfileButton = document.querySelector(".header-profile-button");
 const headerProfileMenu = document.querySelector(".header-profile-menu");
 const logoutButton = document.querySelector(".logout-button");
@@ -30,10 +38,7 @@ const renderHeaderProfileImage = (profileImageUrl) => {
     return;
   }
 
-  const fullProfileImageUrl = profileImageUrl.startsWith("http")
-    ? profileImageUrl
-    : `${API_BASE_URL}${profileImageUrl}`;
-
+  const fullProfileImageUrl = getFullImageUrl(profileImageUrl);
   headerProfileImage.style.backgroundImage = `url(${fullProfileImageUrl})`;
   headerProfileImage.style.backgroundSize = "cover";
   headerProfileImage.style.backgroundPosition = "center";

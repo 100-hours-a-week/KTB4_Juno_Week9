@@ -26,16 +26,6 @@ if (profileEditForm) {
   let uploadedProfileImageUrl = "";
   let isProfileSubmitting = false;
 
-  const getFullProfileImageUrl = (imageUrl) => {
-    if (!imageUrl) {
-      return "";
-    }
-
-    return imageUrl.startsWith("http")
-      ? imageUrl
-      : `${API_BASE_URL}${imageUrl}`;
-  };
-
   const getMyProfileApi = async () => {
     return await request("/users/me");
   };
@@ -123,7 +113,7 @@ if (profileEditForm) {
       return;
     }
 
-    profileImageEditButton.style.backgroundImage = `url(${getFullProfileImageUrl(imageUrl)})`;
+    profileImageEditButton.style.backgroundImage = `url(${getFullImageUrl(imageUrl)})`;
 
     profileImageEditButton.classList.add("has-image");
   };
