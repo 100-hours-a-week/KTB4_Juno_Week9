@@ -43,8 +43,18 @@ const pickField = (source, ...keys) => {
 const getPostId = (post) => pickField(post, "postId", "post_id", "id");
 const getCommentId = (comment) =>
   pickField(comment, "commentId", "comment_id", "id");
+const getCommentAuthorId = (comment) =>
+  pickField(comment, "authorId", "author_id", "userId", "user_id");
 const getImageUrlFromResponse = (response) =>
   pickField(response?.data, "imageUrl", "image_url") ?? "";
+
+const getLoginUserId = () => localStorage.getItem("userId");
+
+const isOwner = (authorId) => {
+  const loginUserId = getLoginUserId();
+
+  return authorId !== undefined && String(authorId) === loginUserId;
+};
 
 const formatCount = (count) => {
   const safeCount = Number(count ?? 0);
@@ -284,6 +294,7 @@ if (postDetailTitle) {
     comments.forEach((comment) => {
       const commentItem = document.createElement("article");
       const commentId = getCommentId(comment);
+      const commentAuthorId = getCommentAuthorId(comment);
       const commentAuthorNickname = pickField(
         comment,
         "authorNickname",
@@ -298,6 +309,27 @@ if (postDetailTitle) {
         "profile_image",
       );
       const commentCreatedAt = pickField(comment, "createdAt", "created_at");
+      const commentActions = isOwner(commentAuthorId)
+        ? `
+      <div class="comment-actions">
+        <button
+          type="button"
+          class="comment-action-button comment-edit-button"
+          aria-label="댓글 수정"
+        >
+          <span class="material-symbols-outlined">edit</span>
+        </button>
+
+        <button
+          type="button"
+          class="comment-action-button comment-delete-button"
+          aria-label="댓글 삭제"
+        >
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+    `
+        : "";
 
       commentItem.className = "comment-item";
       commentItem.dataset.commentId = commentId;
@@ -321,23 +353,7 @@ if (postDetailTitle) {
         </div>
       </div>
 
-      <div class="comment-actions">
-        <button
-          type="button"
-          class="comment-action-button comment-edit-button"
-          aria-label="댓글 수정"
-        >
-          <span class="material-symbols-outlined">edit</span>
-        </button>
-
-        <button
-          type="button"
-          class="comment-action-button comment-delete-button"
-          aria-label="댓글 삭제"
-        >
-          <span class="material-symbols-outlined">delete</span>
-        </button>
-      </div>
+      ${commentActions}
     `;
 
       const commentProfileImage = commentItem.querySelector(
@@ -377,18 +393,12 @@ if (postDetailTitle) {
     }
   };
 
-  const isPostOwner = (authorId) => {
-    const loginUserId = localStorage.getItem("userId");
-
-    return String(authorId) === loginUserId;
-  };
-
   const updatePostActionVisibility = (authorId) => {
     if (!postDetailActions) {
       return;
     }
 
-    if (isPostOwner(authorId)) {
+    if (isOwner(authorId)) {
       postDetailActions.style.display = "flex";
       return;
     }
@@ -400,7 +410,13 @@ if (postDetailTitle) {
     const comments = post.comments ?? [];
 
     const renderedPostId = getPostId(post);
-    const authorId = pickField(post, "authorId", "author_id", "userId", "user_id");
+    const authorId = pickField(
+      post,
+      "authorId",
+      "author_id",
+      "userId",
+      "user_id",
+    );
     const authorNickname = pickField(
       post,
       "nickname",
