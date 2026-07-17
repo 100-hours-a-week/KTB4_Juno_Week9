@@ -263,6 +263,7 @@ if (postDetailTitle) {
 
   const likeState = {
     liked: false,
+    likeCount: 0,
     isProcessing: false,
   };
 
@@ -371,10 +372,14 @@ if (postDetailTitle) {
   };
 
   const updateLikeState = (likeCount, liked) => {
-    postDetailLikeCount.textContent = formatCount(likeCount);
-    likeState.liked = liked;
+    const nextLikeCount = Number(likeCount ?? likeState.likeCount ?? 0);
+    const nextLiked = Boolean(liked);
 
-    detailLikeStatCard.classList.toggle("liked", liked);
+    postDetailLikeCount.textContent = formatCount(nextLikeCount);
+    likeState.likeCount = nextLikeCount;
+    likeState.liked = nextLiked;
+
+    detailLikeStatCard.classList.toggle("liked", nextLiked);
   };
 
   const reloadComments = async () => {
@@ -551,10 +556,10 @@ if (postDetailTitle) {
     };
 
     const startEditComment = (commentId) => {
-    const comment = currentComments.find(
-      (currentComment) =>
+      const comment = currentComments.find(
+        (currentComment) =>
           String(getCommentId(currentComment)) === String(commentId),
-    );
+      );
 
       if (!comment) {
         return;
@@ -582,13 +587,20 @@ if (postDetailTitle) {
       detailLikeStatCard.setAttribute("aria-busy", "true");
 
       try {
-        const response = likeState.liked
+        const previousLiked = likeState.liked;
+        const previousLikeCount = likeState.likeCount;
+        const fallbackLiked = !previousLiked;
+        const fallbackLikeCount = previousLiked
+          ? Math.max(previousLikeCount - 1, 0)
+          : previousLikeCount + 1;
+        const response = previousLiked
           ? await deleteLikeApi()
           : await addLikeApi();
 
         updateLikeState(
-          pickField(response.data, "likeCount", "like_count"),
-          response.data.liked,
+          pickField(response?.data, "likeCount", "like_count") ??
+            fallbackLikeCount,
+          response?.data?.liked ?? fallbackLiked,
         );
       } catch (error) {
         alert(error.message);
