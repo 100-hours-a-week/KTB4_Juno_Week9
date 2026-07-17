@@ -27,8 +27,17 @@ if (headerProfileButton && headerProfileMenu) {
   });
 }
 
+let myProfileApiPromise = null;
+
 const getMyProfileApi = async () => {
-  return await request("/users/me");
+  if (!myProfileApiPromise) {
+    myProfileApiPromise = request("/users/me").catch((error) => {
+      myProfileApiPromise = null;
+      throw error;
+    });
+  }
+
+  return await myProfileApiPromise;
 };
 
 const renderHeaderProfileImage = (profileImageUrl) => {

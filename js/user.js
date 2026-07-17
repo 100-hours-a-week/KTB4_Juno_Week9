@@ -26,10 +26,6 @@ if (profileEditForm) {
   let uploadedProfileImageUrl = "";
   let isProfileSubmitting = false;
 
-  const getMyProfileApi = async () => {
-    return await request("/users/me");
-  };
-
   const updateMyProfileApi = async () => {
     let profileImageUrl = uploadedProfileImageUrl;
 
